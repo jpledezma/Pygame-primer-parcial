@@ -1,3 +1,7 @@
+from pygame import font, image
+
+font.init() 
+
 ANCHO = 800
 ALTO = 600
 TAMAÑO_PANTALLA = (ANCHO, ALTO)
@@ -16,3 +20,7 @@ GRIS_CLARO = (211, 211, 211)
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
 OSCURO = (25, 25, 25)
+
+FUENTE_DEFAULT = font.SysFont("serif", 30)
+
+FONDO_PRINCIPAL = image.load("assets/paisaje-1.jpg")

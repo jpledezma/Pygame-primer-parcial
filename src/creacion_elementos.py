@@ -1,6 +1,7 @@
 import pygame
 from pygame import Rect, Surface
 from pygame.font import Font
+from config import FUENTE_DEFAULT
 
 pygame.font.init()
 # Rectángulo
@@ -23,14 +24,16 @@ def crear_rectangulo(origen:tuple[int, int],
     return bloque_rectangulo
 
 # Texto
-def escribir_texto(texto:str, 
+def escribir_texto(origen:tuple[int, int], 
+                   texto:str, 
                    color_texto:tuple[int, int, int],
-                   fuente:pygame.font.Font = Font(None, 24),
+                   fuente:pygame.font.Font = FUENTE_DEFAULT,
                    antialias:bool = True,
                   ) -> dict:
     
     superficie_texto = fuente.render(texto, antialias, color_texto)
     rectangulo_texto = superficie_texto.get_rect()
+    rectangulo_texto = Rect(*origen, rectangulo_texto.width, rectangulo_texto.height)
 
     bloque_texto = {'superficie':superficie_texto, 'rect':rectangulo_texto}
 
@@ -66,18 +69,19 @@ def crear_boton(origen:tuple[int, int],
                 texto:str,
                 color_texto:tuple[int, int, int] = (255, 255, 255),
                 color_fondo:tuple[int, int, int] = (0, 0, 0),
-                fuente:pygame.font.Font = Font(None, 24),
+                fuente:pygame.font.Font = FUENTE_DEFAULT,
                 antialias:bool = True,
-                espaciado:int = 0,
+                espaciado_x:int = 0,
+                espaciado_y:int = 0,
                 imagen:Surface | None = None
                ):
     
-    btn_texto = escribir_texto(texto, color_texto, fuente, antialias)
+    btn_texto = escribir_texto((0, 0),texto, color_texto, fuente, antialias)
     rect_texto:Rect = btn_texto['rect']
 
     btn_superficie = crear_superficie(origen,
-                                      rect_texto.width + espaciado,
-                                      rect_texto.height + espaciado,
+                                      rect_texto.width + espaciado_x,
+                                      rect_texto.height + espaciado_y,
                                       color_fondo,
                                       imagen)
     
@@ -89,7 +93,9 @@ def crear_boton(origen:tuple[int, int],
     bloque_boton = {'fondo':btn_superficie['superficie'],
                     'rect_superficie':rect_superficie,
                     'texto':btn_texto['superficie'],
-                    'rect_texto':rect_texto
+                    'rect_texto':rect_texto,
                    }
 
     return bloque_boton
+
+# TODO: validar datos

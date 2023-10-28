@@ -3,6 +3,7 @@ from pygame.locals import *
 from config import *
 from creacion_elementos import *
 from dibujar_elementos import *
+from utilidades import *
 
 
 pygame.init()
@@ -12,18 +13,22 @@ CLOCK = pygame.time.Clock()
 pantalla = pygame.display.set_mode(TAMAÑO_PANTALLA)
 
 
-def terminar():
-    pygame.quit()
-    exit()
 
 
-img_fondo = pygame.image.load("assets/paisaje-1.jpg")
 
-fuente = pygame.font.SysFont("serif", 26)
+img_fondo = FONDO_PRINCIPAL
 
-button = crear_boton((300, 300), "Once, the lord of light banished dark...", BURDEOS, OSCURO, fuente, True, 10, img_fondo)
+fuente = pygame.font.SysFont("Arial", 26)
 
-# Colisiones pygame
+button = crear_boton((300, 300), "Once, the lord of light banished dark...", BURDEOS, OSCURO, fuente, True, 10, imagen=img_fondo)
+
+sup = crear_superficie((400, 50), 50, 100, AMARILLO)
+
+txt = escribir_texto((50, 50),"asdfghjkl", NEGRO)
+
+menu_principal(pantalla)
+
+
 
 is_running = True
 
@@ -45,6 +50,8 @@ while is_running:
 
     blitear_boton(pantalla, button)
 
+    blitear_texto(pantalla, txt)
+    blitear_superficie(pantalla, sup)
 # ---> actualizar pantalla
 
     # con flip se actualiza/dibuja toda la pantalla
