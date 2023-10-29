@@ -12,3 +12,21 @@ def calcular_distancia(punto_1:tuple[int, int], punto_2:tuple[int, int]) -> floa
     distancia_total = calcular_hipotenusa(distancia_x, distancia_y)
 
     return distancia_total
+
+def calcular_escala(valor:int | float, inicio:int | float, fin:int | float) -> float:
+    if inicio != 0:
+        # "Desplazar" la recta hacia la izquierda o derecha, para que el inicio quede en 0
+        fin = fin - inicio
+        valor = valor - inicio
+        inicio = 0
+
+    # Regla de 3 simple
+    porcentaje_valor = valor * 100 / fin
+
+    return porcentaje_valor
+
+def calcular_posicion_recta(porcentaje: int | float, inicio: int | float, fin: int | float):
+    porcentaje /= 100
+    posicion = inicio + porcentaje * (fin - inicio)
+    
+    return posicion

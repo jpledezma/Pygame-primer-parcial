@@ -3,7 +3,8 @@ from pygame.locals import *
 from config import *
 from creacion_elementos import *
 from dibujar_elementos import *
-from utilidades import *
+from utilidades import terminar_juego
+from menus import *
 
 
 pygame.init()

@@ -30,4 +30,5 @@ FUENTE_DEFAULT = font.Font("assets/fuentes/ENDOR___.ttf", 30)
 FONDO_PRINCIPAL = image.load("assets/paisaje-1.jpg")
 
 musica_activa = True
-volumen_general = 1
+volumen_musica_global = 1
+volumen_efectos_global = 1
