@@ -9,8 +9,8 @@ def crear_rectangulo(origen:tuple[int, int],
                      ancho:int, 
                      alto:int, 
                      color:tuple[int, int, int], 
-                     ancho_borde:int=-1, 
-                     radio_borde:int=0
+                     ancho_borde:int=0, 
+                     radio_borde:int=-1
                     ) -> dict:
     
     rectangulo = Rect(*origen, ancho, alto)
@@ -22,6 +22,19 @@ def crear_rectangulo(origen:tuple[int, int],
                  }
     
     return bloque_rectangulo
+
+def crear_circulo(centro:tuple, 
+                  radio:int, 
+                  color:tuple, 
+                  ancho_borde:int=0) -> dict:
+    
+    circulo = {'tipo': "circulo",
+                'centro': list(centro), # Se convierte a list para poder modificar su valor
+                'radio': radio,
+                'color': color,
+                'ancho_borde':ancho_borde }
+    
+    return circulo
 
 # Texto
 def escribir_texto(origen:tuple[int, int], 

@@ -13,12 +13,12 @@ CLOCK = pygame.time.Clock()
 pantalla = pygame.display.set_mode(TAMAÑO_PANTALLA)
 
 
-
+pygame.display.set_caption(TITULO)
 
 
 img_fondo = FONDO_PRINCIPAL
 
-fuente = pygame.font.SysFont("Arial", 26)
+fuente = pygame.font.Font("assets/fuentes/ENDOR___.ttf", 30)
 
 button = crear_boton((300, 300), "Once, the lord of light banished dark...", BURDEOS, OSCURO, fuente, True, 10, imagen=img_fondo)
 
@@ -28,11 +28,13 @@ txt = escribir_texto((50, 50),"asdfghjkl", NEGRO)
 
 menu_principal(pantalla)
 
-
+pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
+pygame.mixer.music.play(start=0, loops=-1)
 
 is_running = True
 
 while is_running:
+    
     CLOCK.tick(FPS)
 
     for event in pygame.event.get():
