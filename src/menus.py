@@ -13,7 +13,7 @@ def menu_principal(pantalla:pygame.Surface):
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
 
     # Background
-    fondo_menu = pygame.image.load("assets/main-menu-background.jpg")
+    fondo_menu = pygame.image.load("assets//backgrounds/main-menu-background.jpg")
     fondo_menu = pygame.transform.scale(fondo_menu, (ancho_pantalla, alto_pantalla))
 
     # Título del juego en el menu
@@ -94,7 +94,7 @@ def menu_opciones(pantalla:pygame.Surface):
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
 
     # Background
-    fondo_menu = pygame.image.load("assets/main-menu-background.jpg")
+    fondo_menu = pygame.image.load("assets/backgrounds/main-menu-background.jpg")
     fondo_menu = pygame.transform.scale(fondo_menu, (ancho_pantalla, alto_pantalla))
 
     # Texto principal del menú
@@ -191,11 +191,11 @@ def menu_opciones(pantalla:pygame.Surface):
                         elif boton == btn_parar_musica:
                             if musica_activa:
                                 musica_activa = False
-                                print("Parar musica")
+                                # print("Parar musica")
                                 pygame.mixer.music.stop()
                             else:
                                 musica_activa = True
-                                print("Activar música")
+                                # print("Activar música")
                                 pygame.mixer.music.play()
                         elif boton == btn_salir:
                             print("Salir")

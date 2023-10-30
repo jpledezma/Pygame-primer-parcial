@@ -2,10 +2,10 @@ from pygame import font, image
 
 font.init() 
 
-ANCHO = 1200
+ANCHO = 1120
 ALTO = 800
 TAMAÑO_PANTALLA = (ANCHO, ALTO)
-FPS = 120
+FPS = 90
 
 ROJO = (217, 4, 41)
 VERDE = (0, 128, 0)
@@ -24,7 +24,6 @@ OSCURO = (25, 25, 25)
 
 TITULO = "In Tenebris"
 
-# FUENTE_DEFAULT = font.SysFont("serif", 30)
 FUENTE_DEFAULT = font.Font("assets/fuentes/ENDOR___.ttf", 30)
 
 FONDO_PRINCIPAL = image.load("assets/paisaje-1.jpg")

@@ -56,7 +56,7 @@ def escribir_texto(origen:tuple[int, int],
 def crear_superficie(origen:tuple[int, int],
                      ancho:int,
                      alto:int,
-                     color:tuple[int, int, int],
+                     color:tuple[int, int, int] = (0, 0, 0),
                      imagen:Surface | None = None
                     ) -> dict:
     

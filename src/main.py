@@ -5,6 +5,7 @@ from creacion_elementos import *
 from dibujar_elementos import *
 from utilidades import terminar_juego
 from menus import *
+from escenario_principal import *
 
 
 pygame.init()
@@ -17,50 +18,19 @@ pantalla = pygame.display.set_mode(TAMAÑO_PANTALLA)
 pygame.display.set_caption(TITULO)
 
 
-img_fondo = FONDO_PRINCIPAL
-
-fuente = pygame.font.Font("assets/fuentes/ENDOR___.ttf", 30)
-
-button = crear_boton((300, 300), "Once, the lord of light banished dark...", BURDEOS, OSCURO, fuente, True, 10, imagen=img_fondo)
-
-sup = crear_superficie((400, 50), 50, 100, AMARILLO)
-
-txt = escribir_texto((50, 50),"asdfghjkl", NEGRO)
-
-menu_principal(pantalla)
-
-pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
-pygame.mixer.music.play(start=0, loops=-1)
-
 is_running = True
 
 while is_running:
     
     CLOCK.tick(FPS)
 
+    menu_principal(pantalla)
+    escenario_juego(pantalla)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
 
         
-        
-# ---> actualizar los elementos    
-
-
-
-# ---> Dibujar la pantalla
-    pantalla.fill(GRIS_OSCURO)
-
-    blitear_boton(pantalla, button)
-
-    blitear_texto(pantalla, txt)
-    blitear_superficie(pantalla, sup)
-# ---> actualizar pantalla
-
-    # con flip se actualiza/dibuja toda la pantalla
     pygame.display.flip()
-
-
-
 
 pygame.quit()
