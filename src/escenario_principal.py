@@ -5,15 +5,19 @@ from dibujar_elementos import *
 from config import *
 from calculos import *
 from utilidades import *
+from menus import *
 
 # ------------------  Menu Principal  ------------------
 def escenario_juego(pantalla:pygame.Surface):
+
+    global musica_activa
 
     CLOCK = pygame.time.Clock()
 
     contador_segundos = 0
     contador_ticks = FPS
-    contador_animaciones = FPS // 4
+    duracion_frame_animacion = FPS // 4
+    contador_animaciones = duracion_frame_animacion
     frame_animacion_seleccionada = 0
 
     ancho_pantalla = pantalla.get_width()
@@ -38,17 +42,19 @@ def escenario_juego(pantalla:pygame.Surface):
     texto_contador_segundos = escribir_texto((0, 0), f"{contador_segundos:03}", AMARILLO)
     texto_contador_segundos['rect'].center = (ancho_pantalla //2, altura_hud // 2)
     
-
+    print(musica_activa)
     # Música del juego
     pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
     if musica_activa:
         pygame.mixer.music.play(start=0, loops=-1)
+    
 
     # Personaje principal
     img_personaje = pygame.image.load("assets/sprites/personaje/knight_idle_0.png")
-    personaje = crear_superficie((0, 0), 90, 70, imagen=img_personaje)
-    personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla / 2)
-    vel_personaje = 1
+    personaje = crear_entidad((0, 0), 90, 70, 200, 20, 100, 50, imagen=img_personaje)
+    personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
+    personaje['velocidad'] = 1
+    personaje['hitbox'].width = personaje['rect'].width // 2 
 
     pj_mover_arriba = False
     pj_mover_abajo = False
@@ -69,6 +75,15 @@ def escenario_juego(pantalla:pygame.Surface):
     movimiento_animacion_seleccionada = 'quieto'
 
     # Enemigos
+    img_zombie = img_personaje = pygame.image.load("assets/sprites/enemigos/zombie.png")
+    zombie = crear_entidad((400, 400), 75, 100, 100, 10, imagen=img_zombie)
+    img_esqueleto = img_personaje = pygame.image.load("assets/sprites/enemigos/skeleton.png")
+    esqueleto = crear_entidad((500, 400), 70, 100, 100, 10, imagen=img_esqueleto)
+
+    enemigos = [zombie, esqueleto]
+
+    entidades = [personaje, zombie, esqueleto]
+
     i = 0
     # Loop del juego
     while True:
@@ -78,8 +93,10 @@ def escenario_juego(pantalla:pygame.Surface):
                 terminar_juego()
 
             if evento.type == KEYDOWN:
-                if evento.key == K_p:
+                if evento.key == K_p or evento.key == K_ESCAPE:
                     print("pausa")
+                    menu_opciones(pantalla)
+                    
                 if evento.key == K_w:
                     pj_mover_arriba = True
                 if evento.key == K_a:
@@ -90,7 +107,7 @@ def escenario_juego(pantalla:pygame.Surface):
                     pj_mover_derecha = True
 
                 if evento.key == K_LSHIFT:
-                    vel_personaje = 2
+                    personaje['velocidad'] = 2
 
             if evento.type == KEYUP:
                 if evento.key == K_w:
@@ -103,28 +120,31 @@ def escenario_juego(pantalla:pygame.Surface):
                     pj_mover_derecha = False
 
                 if evento.key == K_LSHIFT:
-                    vel_personaje = 1
+                    personaje['velocidad'] = 1
                 
         
 
         if pj_mover_izquierda and personaje["rect"].left > limite_izquierdo:
-            personaje["rect"].centerx -= vel_personaje
+            personaje["rect"].centerx -= personaje['velocidad']
             movimiento_animacion_seleccionada = 'moviendo_izquierda'
 
         if pj_mover_derecha and personaje["rect"].right < limite_derecho:
-            personaje["rect"].centerx += vel_personaje
+            personaje["rect"].centerx += personaje['velocidad']
             movimiento_animacion_seleccionada = 'moviendo_derecha'
 
         if not (pj_mover_izquierda or pj_mover_derecha or pj_mover_arriba or pj_mover_abajo):
             movimiento_animacion_seleccionada = 'quieto'
 
         if pj_mover_arriba and personaje["rect"].top > limite_superior:
-            personaje["rect"].centery -= vel_personaje
+            personaje["rect"].centery -= personaje['velocidad']
             movimiento_animacion_seleccionada = 'moviendo_arriba'
 
         if pj_mover_abajo and personaje["rect"].bottom < limite_inferior:
-            personaje["rect"].centery += vel_personaje
+            personaje["rect"].centery += personaje['velocidad']
             movimiento_animacion_seleccionada = 'moviendo_abajo'
+
+
+
 
 
 
@@ -143,16 +163,51 @@ def escenario_juego(pantalla:pygame.Surface):
 
         contador_animaciones -= 1
         if contador_animaciones == 0:
-            contador_animaciones = FPS // 4
+            contador_animaciones = duracion_frame_animacion
             frame_animacion_seleccionada += 1
         if frame_animacion_seleccionada > 3:
             frame_animacion_seleccionada = 0
 
-        #pantalla.blit(personaje['superficie'], personaje['rect'])
-        #animacion_personaje(pantalla, animaciones, personaje['rect'])
-        pantalla.blit(animaciones[movimiento_animacion_seleccionada][frame_animacion_seleccionada]['superficie'], personaje['rect'])
-        blitear_texto(pantalla, texto_contador_segundos)
 
+        # Movimiento enemigos
+        for enemigo in enemigos:
+            if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) <= enemigo['radio_deteccion']:
+                enemigo['agresivo'] = True
+                # print(calcular_distancia(enemigo['rect'].center, personaje['rect'].center))
+
+        for enemigo in enemigos:
+            if enemigo['agresivo']:
+                if enemigo['rect'].centery > personaje['rect'].centery:
+                    enemigo['rect'].centery -= enemigo['velocidad']
+                else:
+                    enemigo['rect'].centery += enemigo['velocidad']
+                if enemigo['rect'].centerx > personaje['rect'].centerx:
+                    enemigo['rect'].centerx -= enemigo['velocidad']
+                else:
+                    enemigo['rect'].centerx += enemigo['velocidad']
+
+                if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) > enemigo['radio_deteccion'] * 3:
+                    enemigo['agresivo'] = False
+
+
+        for entidad in entidades:
+            entidad['hitbox'].bottom = entidad['rect'].bottom
+            entidad['hitbox'].centerx = entidad['rect'].centerx
+
+        blitear_superficie(pantalla, zombie)
+        blitear_superficie(pantalla, esqueleto)
+
+        pantalla.blit(animaciones[movimiento_animacion_seleccionada][frame_animacion_seleccionada]['superficie'], personaje['rect'])
+
+        pygame.draw.rect(pantalla, BLANCO, zombie['rect'], 1)
+        pygame.draw.rect(pantalla, BLANCO, esqueleto['rect'], 1)
+        pygame.draw.rect(pantalla, BLANCO, zombie['hitbox'], 1)
+        pygame.draw.rect(pantalla, BLANCO, esqueleto['hitbox'], 1)
+
+        pygame.draw.rect(pantalla, ROJO, personaje['hitbox'], 1)
+        # pygame.draw.rect(pantalla, BLANCO, personaje['rect'], 1)
+
+        blitear_texto(pantalla, texto_contador_segundos)
 
         i += 1
         if i > 3:

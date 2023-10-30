@@ -7,7 +7,7 @@ def blitear_boton(pantalla:pygame.Surface, boton:dict):
 def blitear_texto(pantalla:pygame.Surface, texto:dict):
     pantalla.blit(texto['superficie'], texto['rect'])
 
-def blitear_superficie(pantalla:pygame.Surface, superficie:pygame.Surface):
+def blitear_superficie(pantalla:pygame.Surface, superficie:dict):
     pantalla.blit(superficie['superficie'], superficie['rect'])
 
 def dibujar_rectangulo(superficie:pygame.Surface, rectangulo:dict) -> None:

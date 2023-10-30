@@ -111,4 +111,34 @@ def crear_boton(origen:tuple[int, int],
 
     return bloque_boton
 
+# Entidades
+def crear_entidad(origen:tuple[int, int],
+                  ancho:int,
+                  alto:int,
+                  vida:int,
+                  poder_ataque:int = 0,
+                  energia:int = 0,
+                  mana:int = 0,
+                  velocidad:int = 1,
+                  radio_deteccion:int = 100,
+                  color:tuple[int, int, int] = (0, 0, 0),
+                  imagen:Surface | None = None
+                 ) -> dict:
+    
+    entidad = crear_superficie(origen, ancho, alto, color, imagen)
+    hitbox = Rect(*origen, ancho // 1.5, alto // 2)
+    hitbox.bottom = entidad['rect'].bottom
+    hitbox.centerx = entidad['rect'].centerx
+
+    entidad['vida'] = vida
+    entidad['poder_ataque'] = poder_ataque
+    entidad['energia'] = energia
+    entidad['mana'] = mana
+    entidad['velocidad'] = velocidad
+    entidad['hitbox'] = hitbox
+    entidad['agresivo'] = False
+    entidad['radio_deteccion'] = radio_deteccion
+
+    return entidad
+
 # TODO: validar datos
