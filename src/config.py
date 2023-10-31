@@ -21,6 +21,7 @@ GRIS_CLARO = (211, 211, 211)
 NEGRO = (0, 0, 0)
 BLANCO = (255, 255, 255)
 OSCURO = (25, 25, 25)
+DORADO = (200,150,20)
 
 TITULO = "In Tenebris"
 
@@ -28,6 +29,7 @@ FUENTE_DEFAULT = font.Font("assets/fuentes/ENDOR___.ttf", 30)
 
 FONDO_PRINCIPAL = image.load("assets/paisaje-1.jpg")
 
+# esta variable está maldita
 musica_activa = True
 volumen_musica_global = 1
 volumen_efectos_global = 1

@@ -30,3 +30,6 @@ def calcular_posicion_recta(porcentaje: int | float, inicio: int | float, fin: i
     posicion = inicio + porcentaje * (fin - inicio)
     
     return posicion
+
+def regla_3_simple(valor:int | float, maximo_valor:int | float, maximo_equivalente:int | float) -> float:
+    return valor * maximo_equivalente / maximo_valor

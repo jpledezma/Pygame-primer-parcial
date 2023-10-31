@@ -58,13 +58,10 @@ def menu_principal(pantalla:pygame.Surface):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_iniciar:
-                            print("Iniciar")
                             return
                         elif boton == btn_opciones:
-                            print("Opciones")
                             menu_opciones(pantalla)
                         elif boton == btn_salir:
-                            print("Salir")
                             terminar_juego()
                 else:
                     boton['fondo'].fill(BURDEOS)
@@ -186,19 +183,15 @@ def menu_opciones(pantalla:pygame.Surface):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_volver:
-                            print("Volver")
                             return
                         elif boton == btn_parar_musica:
                             if musica_activa:
                                 musica_activa = False
-                                # print("Parar musica")
                                 pygame.mixer.music.stop()
                             else:
                                 musica_activa = True
-                                # print("Activar música")
                                 pygame.mixer.music.play()
                         elif boton == btn_salir:
-                            print("Salir")
                             terminar_juego()
                 else:
                     boton['fondo'].fill(BURDEOS)
@@ -250,6 +243,5 @@ def menu_opciones(pantalla:pygame.Surface):
         dibujar_rectangulo(pantalla, recta_volumen_efectos)
         dibujar_circulo(pantalla, slider_volumen_efectos)
 
-        # print(volumen_musica_global, volumen_efectos_global)
         pygame.display.flip()
 
