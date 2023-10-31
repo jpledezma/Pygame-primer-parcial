@@ -95,10 +95,10 @@ def escenario_juego(pantalla:pygame.Surface):
 
     entidades = [zombie, esqueleto, personaje]
 
-    i = 0
     # Loop del juego
     while True:
         CLOCK.tick(FPS)
+        # ------ Detectar eventos ------
         for evento in pygame.event.get():
             if evento.type == QUIT:
                 terminar_juego()
@@ -106,7 +106,13 @@ def escenario_juego(pantalla:pygame.Surface):
             if evento.type == KEYDOWN:
                 if evento.key == K_p or evento.key == K_ESCAPE:
                     print("pausa")
-                    menu_opciones(pantalla)
+                    # Captura de la pantalla actual, para que se muestre el estado de la partida
+                    # en el menú pausa
+                    captura_pantalla = pygame.Surface((ancho_pantalla, alto_pantalla))
+                    captura_pantalla.blit(pantalla, (0, 0))
+                    terminar_partida = menu_pausa(pantalla, captura_pantalla)
+                    if terminar_partida:
+                        return
                     
                 if evento.key == K_w:
                     pj_mover_arriba = True
@@ -133,6 +139,7 @@ def escenario_juego(pantalla:pygame.Surface):
                 if evento.key == K_LSHIFT:
                     pj_sprint = False
                 
+        # ------ Actualizar elementos ------
 
         # Movimiento personaje
 
@@ -209,6 +216,17 @@ def escenario_juego(pantalla:pygame.Surface):
             entidad['hitbox'].bottom = entidad['rect'].bottom
             entidad['hitbox'].centerx = entidad['rect'].centerx
 
+        
+        # HUD
+        barra_energia['rect'].width = regla_3_simple(personaje['energia'], pj_energia_maxima, fondo_barra_energia['rect'].width - 10)
+        barra_energia['rect'].midleft = (fondo_barra_energia['rect'].left + 5, fondo_barra_energia['rect'].centery)
+
+        barra_mana['rect'].width = regla_3_simple(personaje['mana'], pj_mana_maxima, fondo_barra_mana['rect'].width - 10)
+        barra_mana['rect'].midleft = (fondo_barra_mana['rect'].left + 5, fondo_barra_mana['rect'].centery)
+
+        barra_vida['rect'].width = regla_3_simple(personaje['vida'], pj_vida_maxima, fondo_barra_vida['rect'].width - 10)
+        barra_vida['rect'].midleft = (fondo_barra_vida['rect'].left + 5, fondo_barra_vida['rect'].centery)
+
 
         # Dibujar elementos
 
@@ -234,19 +252,19 @@ def escenario_juego(pantalla:pygame.Surface):
         pantalla.blit(animaciones[pj_animacion_seleccionada][frame_animacion_seleccionada]['superficie'], personaje['rect'])
 
         # Hitboxes
-        # pygame.draw.rect(pantalla, BLANCO, zombie['rect'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, esqueleto['rect'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, zombie['hitbox'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, esqueleto['hitbox'], 1)
-        # pygame.draw.rect(pantalla, ROJO, personaje['hitbox'], 1)
+        pygame.draw.rect(pantalla, BLANCO, zombie['rect'], 1)
+        pygame.draw.rect(pantalla, BLANCO, esqueleto['rect'], 1)
+        pygame.draw.rect(pantalla, BLANCO, zombie['hitbox'], 1)
+        pygame.draw.rect(pantalla, BLANCO, esqueleto['hitbox'], 1)
+        pygame.draw.rect(pantalla, ROJO, personaje['hitbox'], 1)
 
         
 
 
         pygame.display.flip()
 
-pygame.init()
-escenario_juego(pygame.display.set_mode(TAMAÑO_PANTALLA))
+# pygame.init()
+# escenario_juego(pygame.display.set_mode(TAMAÑO_PANTALLA))
 
 # TODO 
 # agregar menu de pausa

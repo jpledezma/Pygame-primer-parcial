@@ -33,4 +33,4 @@ while is_running:
         
     pygame.display.flip()
 
-pygame.quit()
+terminar_juego()

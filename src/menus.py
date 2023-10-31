@@ -43,7 +43,8 @@ def menu_principal(pantalla:pygame.Surface):
 
     # Música del juego
     pygame.mixer.music.load("assets\musica\The-wanderer.mp3")
-    pygame.mixer.music.play(start=0, loops=-1)
+    if musica_activa:
+        pygame.mixer.music.play(start=0, loops=-1)
     pygame.mixer.music.set_volume(volumen_musica_global)
 
     # Loop del menu
@@ -144,8 +145,6 @@ def menu_opciones(pantalla:pygame.Surface):
     slider_musica_presionado = False
     slider_efectos_presionado = False
 
-    sliders = [slider_volumen_musica, slider_volumen_efectos]
-
     # Tecto volumen efectos
     texto_volumen_efectos = escribir_texto((0, 0), "Volumen efectos", AMARILLO)
     texto_volumen_efectos['rect'].center = (recta_volumen_efectos['rect'].centerx, recta_volumen_efectos['rect'].centery - 50)
@@ -183,7 +182,12 @@ def menu_opciones(pantalla:pygame.Surface):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_volver:
-                            return
+                            # El return True sirve como flag por si se entra a las opciones desde Pausa,
+                            # ya que al pulsar en "volver", se detecta al mismo tiempo una pulsación en el
+                            # mismo lugar pero en la pantalla pausa.
+                            # Esa posición le corresponda al botón "Ir al menú principal", por lo que sale
+                            # Inmediatamente del menú pausa y va al menú principal
+                            return True
                         elif boton == btn_parar_musica:
                             if musica_activa:
                                 musica_activa = False
@@ -245,3 +249,81 @@ def menu_opciones(pantalla:pygame.Surface):
 
         pygame.display.flip()
 
+
+# ------------------  Menu pausa  ------------------
+def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface):
+    ancho_pantalla = pantalla.get_width()
+    alto_pantalla = pantalla.get_height()
+    centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
+
+    # Background
+    filtro_pantalla = pygame.Surface((ancho_pantalla, alto_pantalla))
+    filtro_pantalla = filtro_pantalla.convert_alpha()
+    filtro_pantalla.fill((0, 0, 0, 150))
+
+    # Título del juego en el menu pausa
+    fuente_pausa = Font("assets/fuentes/ENDOR___.ttf", 50)
+
+    texto_pausa = escribir_texto((0, 0), "Pausa", AMARILLO, fuente=fuente_pausa)
+    sombra_pausa = escribir_texto((0, 0), "Pausa", ROJO, fuente=fuente_pausa)
+
+    texto_pausa['rect'].center = (centro_pantalla[0], alto_pantalla/4)
+    sombra_pausa['rect'].center = (centro_pantalla[0] + 3, alto_pantalla/4 + 3)
+
+    # Botones del menu pausa
+    btn_continuar = crear_boton((0, 0), "Continuar", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+    btn_opciones = crear_boton((0, 0), "Opciones", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+    btn_volver_menu_principal = crear_boton((0, 0), "Ir al menú principal", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+    btn_salir = crear_boton((0, 0), "Salir del juego", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+
+    btn_continuar['rect_superficie'].center = centro_pantalla
+    btn_continuar['rect_texto'].center = centro_pantalla
+
+    btn_opciones['rect_superficie'].center = (centro_pantalla[0], btn_continuar['rect_superficie'].bottom + 50)
+    btn_opciones['rect_texto'].center = (centro_pantalla[0], btn_continuar['rect_superficie'].bottom + 50)
+
+    btn_volver_menu_principal['rect_superficie'].center = (centro_pantalla[0], btn_opciones['rect_superficie'].bottom + 50)
+    btn_volver_menu_principal['rect_texto'].center = (centro_pantalla[0], btn_opciones['rect_superficie'].bottom + 50)
+    # btn_volver_menu_principal['rect_superficie'].center = (100, 100)
+    # btn_volver_menu_principal['rect_texto'].center = (100, 100)
+    
+    btn_salir['rect_superficie'].center = (centro_pantalla[0], btn_volver_menu_principal['rect_superficie'].bottom + 50)
+    btn_salir['rect_texto'].center = (centro_pantalla[0], btn_volver_menu_principal['rect_superficie'].bottom + 50)
+
+    botones = [btn_continuar, btn_opciones, btn_volver_menu_principal, btn_salir]
+
+    # Loop del menu pausa
+    while True:
+        # Flag para volver al menú pausa desde el menú de opciones
+        flag_volver_opciones = False
+        for evento in pygame.event.get():
+            if evento.type == QUIT:
+                terminar_juego()
+                
+            for boton in botones:
+                if hover(boton['rect_superficie'], pygame.mouse.get_pos()):
+                    boton['fondo'].fill(NARANJA)
+                    if evento.type == MOUSEBUTTONDOWN:
+                        if boton == btn_continuar:
+                            return
+                        elif boton == btn_opciones:
+                            flag_volver_opciones = menu_opciones(pantalla)
+                        elif boton == btn_volver_menu_principal and not flag_volver_opciones:
+                            # Flag para salir del escenario y volver al loop principal
+                            return True
+                        elif boton == btn_salir:
+                            terminar_juego()
+                else:
+                    boton['fondo'].fill(BURDEOS)
+
+        pantalla.blit(captura_partida, (0, 0))
+        pantalla.blit(filtro_pantalla, (0, 0))
+
+        for boton in botones:
+            blitear_boton(pantalla, boton)
+            blitear_boton(pantalla, boton)
+
+        blitear_texto(pantalla, sombra_pausa)
+        blitear_texto(pantalla, texto_pausa)
+
+        pygame.display.flip()
