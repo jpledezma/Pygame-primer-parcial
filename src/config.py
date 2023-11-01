@@ -27,7 +27,6 @@ TITULO = "In Tenebris"
 
 FUENTE_DEFAULT = font.Font("assets/fuentes/ENDOR___.ttf", 30)
 
-FONDO_PRINCIPAL = image.load("assets/paisaje-1.jpg")
 
 # esta variable está maldita
 musica_activa = True

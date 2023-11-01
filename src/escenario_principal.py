@@ -12,6 +12,7 @@ from random import randint
 def escenario_juego(pantalla:pygame.Surface):
 
     global musica_activa
+    global volumen_efectos_global
 
     # Control de tiempo
     CLOCK = pygame.time.Clock()
@@ -57,10 +58,22 @@ def escenario_juego(pantalla:pygame.Surface):
     enemigos_derrotados = 0
     texto_contador_enemigos = escribir_texto((0, 0), f"Enemigos derrotados: {enemigos_derrotados:02}", AMARILLO)
     texto_contador_enemigos['rect'].center = (ancho_pantalla // 4 * 3, altura_hud // 2)
+
     # Música del juego
     pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
     if musica_activa:
         pygame.mixer.music.play(start=0, loops=-1)
+    # Sonidos
+    sfx_pj_ataque = pygame.mixer.Sound("./assets/sfx/sword_attack.wav")
+    sfx_usar_pocion = pygame.mixer.Sound("./assets/sfx/potion_pickup.wav")
+    sfx_pj_ataque_especial = pygame.mixer.Sound("./assets/sfx/special_attack.wav")
+    sfx_pj_dañado = pygame.mixer.Sound("./assets/sfx/damage_taken.wav")
+    sfx_ataque_bruja = pygame.mixer.Sound("./assets/sfx/witch_attack.wav")
+    sfx_enemigo_muerto = pygame.mixer.Sound("./assets/sfx/enemy_death.wav")
+    sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto]
+
+    for sonido in sonidos:
+        sonido.set_volume(volumen_efectos_global)
     
 
     # ---- Personaje principal ----
@@ -74,6 +87,7 @@ def escenario_juego(pantalla:pygame.Surface):
     iframes = FPS #// 2
     cooldown_iframes = iframes
     pj_daño_recibido = 0
+    flag_sfx_ataque = False
     # Imagen
     img_personaje = pygame.image.load("assets/sprites/personaje/knight_idle_0.png")
     personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=20, mana=pj_mana_maxima, energia=pj_energia_maxima, imagen=img_personaje)
@@ -111,7 +125,12 @@ def escenario_juego(pantalla:pygame.Surface):
     img_zombie = pygame.image.load("assets/sprites/enemigos/zombie.png")
     img_esqueleto = pygame.image.load("assets/sprites/enemigos/skeleton.png")
     img_bruja = pygame.image.load("assets/sprites/enemigos/witch.png")
+    img_ataque_bruja = pygame.image.load("assets/sprites/efectos/witch_spell.png")
     tipos_enemigos = [img_zombie, img_esqueleto]
+
+    ataque_bruja = FPS * 2
+    cd_ataque_bruja = ataque_bruja
+    flag_ataque_bruja = True
 
     enemigos = []
     for i in range(8):
@@ -134,7 +153,7 @@ def escenario_juego(pantalla:pygame.Surface):
 
     # Evento personalizados
     EVENTO_ENEMIGO_ESPECIAL = pygame.USEREVENT + 1
-    pygame.time.set_timer(EVENTO_ENEMIGO_ESPECIAL, 20000)
+    pygame.time.set_timer(EVENTO_ENEMIGO_ESPECIAL, 15000)
 
     EVENTO_POCION_VIDA = pygame.USEREVENT + 2
     pygame.time.set_timer(EVENTO_POCION_VIDA, 7000)
@@ -181,6 +200,8 @@ def escenario_juego(pantalla:pygame.Surface):
                 if evento.key == K_LSHIFT:
                     pj_sprint = True
 
+                if evento.key == K_i or evento.key == K_k or evento.key == K_j or evento.key == K_l:
+                    flag_sfx_ataque = True
                 # Ataque personaje
                 if evento.key == K_i:
                     pj_ataque_arriba = True
@@ -245,20 +266,37 @@ def escenario_juego(pantalla:pygame.Surface):
             if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) > enemigo['radio_deteccion'] * 3:
                 enemigo['agresivo'] = False
 
+            # cambiar esto
             if personaje['hitbox'].colliderect(enemigo['hitbox']):
                 enemigo["vida"] -= 20
 
+            if enemigo['imagen'] == img_bruja:
+                if flag_ataque_bruja:
+                    flag_ataque_bruja = False
+                    ataque = crear_entidad(enemigo['rect'].center, 50, 50, vida=1, poder_ataque=20, radio_deteccion=1000, imagen=img_ataque_bruja)
+                    enemigos.append(ataque)
+                    entidades.append(ataque)
+                    sfx_ataque_bruja.play()
+                if not flag_ataque_bruja and cd_ataque_bruja > 0:
+                    cd_ataque_bruja -= 1
+                else:
+                    cd_ataque_bruja = ataque_bruja
+                    flag_ataque_bruja = True
+
             if enemigo["vida"] <= 0:
+                sfx_enemigo_muerto.play()
                 enemigos.remove(enemigo)
                 entidades.remove(enemigo)
-                enemigos_derrotados += 1
-                texto_contador_enemigos = escribir_texto((0, 0), f"Enemigos derrotados: {enemigos_derrotados:02}", AMARILLO)
-                texto_contador_enemigos['rect'].center = (ancho_pantalla // 4 * 3, altura_hud // 2)
+                if enemigo['imagen'] != img_ataque_bruja:
+                    enemigos_derrotados += 1
+                    texto_contador_enemigos = escribir_texto((0, 0), f"Enemigos derrotados: {enemigos_derrotados:02}", AMARILLO)
+                    texto_contador_enemigos['rect'].center = (ancho_pantalla // 4 * 3, altura_hud // 2)
 
         for pocion in pociones[:]:
             if personaje['rect'].colliderect(pocion['rect']):
                 pociones.remove(pocion)
                 entidades.remove(pocion)
+                sfx_usar_pocion.play()
                 if pocion["vida"]:
                     personaje['vida'] += 50
                 if personaje['vida'] > pj_vida_maxima:
@@ -273,6 +311,7 @@ def escenario_juego(pantalla:pygame.Surface):
         # -- Personaje --
         # Daño al personaje
         if pj_dañado:
+            sfx_pj_dañado.play()
             pj_dañado = False
             personaje['vida'] -= pj_daño_recibido
             pj_vulnerable = False
@@ -289,6 +328,12 @@ def escenario_juego(pantalla:pygame.Surface):
             pj_mover_arriba = False
             pj_mover_derecha = False
             pj_mover_izquierda = False
+            if flag_sfx_ataque:
+                sfx_pj_ataque.play()
+                flag_sfx_ataque = False
+            # Reproducir el sonido de nuevo si se completa la animacion
+            if contador_ticks == FPS:
+                flag_sfx_ataque = True
 
         if pj_ataque_arriba:
             pj_animacion_seleccionada = 'atacando_arriba'
