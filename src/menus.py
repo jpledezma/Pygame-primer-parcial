@@ -104,21 +104,21 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
     btn_volver = crear_boton((0, 0), "Volver", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
     btn_parar_musica = crear_boton((0, 0), "Activar/desactivar música", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
     btn_salir = crear_boton((0, 0), "Salir del juego", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
-    btn_activar_cheats = crear_boton((0, 0), "Activar Trucos", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+    btn_mostrar_instrucciones = crear_boton((0, 0), "Mostrar teclas", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
 
     btn_parar_musica['rect_superficie'].center = centro_pantalla
     btn_parar_musica['rect_texto'].center = centro_pantalla
 
-    btn_activar_cheats['rect_superficie'].center = (centro_pantalla[0], btn_parar_musica['rect_superficie'].bottom + 50)
-    btn_activar_cheats['rect_texto'].center = (centro_pantalla[0], btn_parar_musica['rect_superficie'].bottom + 50)
+    btn_mostrar_instrucciones['rect_superficie'].center = (centro_pantalla[0], btn_parar_musica['rect_superficie'].bottom + 50)
+    btn_mostrar_instrucciones['rect_texto'].center = (centro_pantalla[0], btn_parar_musica['rect_superficie'].bottom + 50)
 
-    btn_volver['rect_superficie'].center = (centro_pantalla[0], btn_activar_cheats['rect_superficie'].bottom + 50)
-    btn_volver['rect_texto'].center = (centro_pantalla[0], btn_activar_cheats['rect_superficie'].bottom + 50)
+    btn_volver['rect_superficie'].center = (centro_pantalla[0], btn_mostrar_instrucciones['rect_superficie'].bottom + 50)
+    btn_volver['rect_texto'].center = (centro_pantalla[0], btn_mostrar_instrucciones['rect_superficie'].bottom + 50)
 
     btn_salir['rect_superficie'].center = (centro_pantalla[0], btn_volver['rect_superficie'].bottom + 50)
     btn_salir['rect_texto'].center = (centro_pantalla[0], btn_volver['rect_superficie'].bottom + 50)
 
-    botones = [btn_parar_musica, btn_activar_cheats, btn_volver, btn_salir]
+    botones = [btn_parar_musica, btn_mostrar_instrucciones, btn_volver, btn_salir]
 
 
     # Selector de volumen de la música

@@ -56,6 +56,19 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
     texto_contador_enemigos = escribir_texto((0, 0), f"Enemigos derrotados: {enemigos_derrotados:02}", AMARILLO)
     texto_contador_enemigos['rect'].center = (ancho_pantalla // 4 * 3, altura_hud // 2)
 
+    # Trucos
+    texto_trucos_activos = escribir_texto((0, 0), f"Trucos activos", AQUA)
+    texto_trucos_activos['rect'].center = (ancho_pantalla //2, altura_hud // 2 + 80)      
+    trucos_activos = False
+    trucos = {'mostrar_hitboxes': False,
+              'vida_infinita': False,
+              'energia_infinita': False,
+              'mana_infinita': False,
+              'invisible': False,
+              'one-shot': False,
+              'super_velocidad':False
+             }
+
     # Música del juego
     pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
     if musica_activa:
@@ -159,17 +172,21 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 
     # Loop del juego
     while True:
+        CLOCK.tick(FPS)
+        # Ajustar el sonido de los efectos
         for sonido in sonidos:
             sonido.set_volume(volumen_efectos)
-        CLOCK.tick(FPS)
+
         # ------ Detectar eventos ------
         for evento in pygame.event.get():
+            # Salir del juego
             if evento.type == QUIT:
                 terminar_juego()
 
+            # -- Presionar teclas --
             if evento.type == KEYDOWN:
+                # Pausa
                 if evento.key == K_p or evento.key == K_ESCAPE:
-                    print("pausa")
                     # Captura de la pantalla actual, para que se muestre el estado de la partida
                     # en el menú pausa
                     captura_pantalla = pygame.Surface((ancho_pantalla, alto_pantalla))
@@ -177,7 +194,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                     musica_activa, volumen_musica, volumen_efectos, terminar_partida = menu_pausa(pantalla, captura_pantalla, musica_activa, volumen_musica, volumen_efectos)
                     if terminar_partida:
                         return musica_activa, volumen_musica, volumen_efectos
-                    
+
                 # Iniciar movimiento personaje
                 if evento.key == K_w or evento.key == K_a or evento.key == K_s or evento.key == K_d:
                     pj_atacando = False
@@ -206,8 +223,61 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 if evento.key == K_j:
                     pj_ataque_izquierda = True
 
-            # Detener movimiento personaje
+                # Trucos
+                if evento.key == K_F1:
+                    if trucos_activos:
+                        trucos_activos = False
+                    else:
+                        trucos_activos = True
+
+                if trucos_activos:
+
+                    if evento.key == K_1:
+                        if trucos['mostrar_hitboxes']:
+                            trucos['mostrar_hitboxes'] = False
+                        else:
+                            trucos['mostrar_hitboxes'] = True
+                            
+
+                    if evento.key == K_2:
+                        if trucos['vida_infinita']:
+                            trucos['vida_infinita'] = False
+                        else:
+                            trucos['vida_infinita'] = True
+
+                    if evento.key == K_3:
+                        if trucos['mana_infinita']:
+                            trucos['mana_infinita'] = False
+                        else:
+                            trucos['mana_infinita'] = True
+
+                    if evento.key == K_4:
+                        if trucos['energia_infinita']:
+                            trucos['energia_infinita'] = False
+                        else:
+                            trucos['energia_infinita'] = True
+
+                    if evento.key == K_5:
+                        if trucos['one-shot']:
+                            trucos['one-shot'] = False
+                        else:
+                            trucos['one-shot'] = True
+
+                    if evento.key == K_6:
+                        if trucos['invisible']:
+                            trucos['invisible'] = False
+                        else:
+                            trucos['invisible'] = True
+
+                    if evento.key == K_7:
+                        if trucos['super_velocidad']:
+                            trucos['super_velocidad'] = False
+                        else:
+                            trucos['super_velocidad'] = True
+
+            # -- Soltar teclas --
             if evento.type == KEYUP:
+                # Detener movimiento personaje
                 if evento.key == K_i or evento.key == K_k or evento.key == K_j or evento.key == K_l:
                     pj_atacando = False
                 if evento.key == K_w:
@@ -232,16 +302,18 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 if evento.key == K_j:
                     pj_ataque_izquierda = False
 
+            # Spawn bruja
             if evento.type == EVENTO_ENEMIGO_ESPECIAL:
                 bruja = crear_entidad((randint(limite_izquierdo, limite_derecho - 75), limite_superior), ancho=75, alto=100, vida=300, radio_deteccion=0, poder_ataque=100,iframes=FPS//2, imagen=img_bruja)
                 enemigos.append(bruja)
                 entidades.append(bruja)
-
-            if evento.type == EVENTO_POCION_VIDA and len(pociones) <= 2:
+            
+            # Spawn pociones
+            if evento.type == EVENTO_POCION_VIDA and len(pociones) < 2:
                 pocion_vida = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=1, mana=0, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_vida)
                 pociones.append(pocion_vida)
                 entidades.append(pocion_vida)
-            if evento.type == EVENTO_POCION_MANA and len(pociones) <= 2:
+            if evento.type == EVENTO_POCION_MANA and len(pociones) < 2:
                 pocion_mana = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=0, mana=1, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_mana)
                 pociones.append(pocion_mana)
                 entidades.append(pocion_mana)
@@ -346,6 +418,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                     texto_contador_enemigos = escribir_texto((0, 0), f"Enemigos derrotados: {enemigos_derrotados:02}", AMARILLO)
                     texto_contador_enemigos['rect'].center = (ancho_pantalla // 4 * 3, altura_hud // 2)
 
+        # Consumir pociones
         for pocion in pociones[:]:
             if personaje['rect'].colliderect(pocion['rect']):
                 pociones.remove(pocion)
@@ -397,6 +470,9 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         if pj_sprint and personaje['energia'] > 0:
             personaje['energia'] -= 1
             multiplicador_sprint = 2
+        # Hay que poner esto si se activa el truco energia infinita, idk why
+        if not pj_sprint:
+            multiplicador_sprint = 1
         if not pj_sprint and not pj_atacando and personaje['energia'] < pj_energia_maxima:
             personaje['energia'] += 1
             multiplicador_sprint = 1
@@ -404,7 +480,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         if personaje['energia'] <= 0:
             pj_sprint = False
             pj_atacando = False
-
+        
         # Animaciones
         contador_animaciones -= 1
         if contador_animaciones == 0:
@@ -461,6 +537,24 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         if len(enemigos) == 0:
             print("Victoria")
 
+        # Trucos
+        if trucos['vida_infinita']:
+            pj_vida_maxima = 1000000
+            personaje['vida'] = pj_vida_maxima
+        if trucos['energia_infinita']:
+            pj_energia_maxima = 100000
+            personaje['energia'] = pj_energia_maxima
+        if trucos['mana_infinita']:
+            pj_mana_maxima = 100000
+            personaje['mana'] = pj_mana_maxima
+        if trucos['one-shot']:
+            personaje['poder_ataque'] = 100000
+        if trucos['super_velocidad'] and pj_sprint:
+            multiplicador_sprint = 5
+        if trucos['invisible']:
+            for enemigo in enemigos:
+                enemigo['radio_deteccion'] = 0
+
 
         # ------ Dibujar elementos ------
 
@@ -484,12 +578,15 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         for enemigo in enemigos:
             blitear_superficie(pantalla, enemigo)
 
-        # Hitboxes
-        # if pj_atacando:
-        #     dibujar_rectangulo(pantalla, hitbox_ataque)
-        # for entidad in entidades:
-        #     pygame.draw.rect(pantalla, BLANCO, entidad['hitbox'], 1)
-        #     pygame.draw.rect(pantalla, BLANCO, entidad['rect'], 1)
+        if trucos_activos:
+            blitear_texto(pantalla, texto_trucos_activos)
+            if trucos['mostrar_hitboxes']:
+                # Hitboxes
+                if pj_atacando:
+                    dibujar_rectangulo(pantalla, hitbox_ataque)
+                for entidad in entidades:
+                    pygame.draw.rect(pantalla, AMARILLO, entidad['hitbox'], 1)
+                    pygame.draw.rect(pantalla, BLANCO, entidad['rect'], 1)
 
         # Personaje
         pantalla.blit(animaciones[pj_animacion_seleccionada][frame_animacion_seleccionada]['superficie'], personaje['rect'])
@@ -504,8 +601,6 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 # TODO 
 # Agregar ataque especial del personaje
 # Agregar excepciones
-# Agregar trucos
-# Solucionar bug sonidos efectos
 # Agregar pantalla game over
-# Agregar puntuaciones y guardarlas en un archivo
 # Agregar menu puntuaciones
+# Agregar puntuaciones y guardarlas en un archivo
