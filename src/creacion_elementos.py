@@ -120,8 +120,10 @@ def crear_entidad(origen:tuple[int, int],
                   energia:int = 0,
                   mana:int = 0,
                   velocidad:int = 1,
-                  radio_deteccion:int = 100,
+                  radio_deteccion:int = 150,
                   color:tuple[int, int, int] = (0, 0, 0),
+                  iframes:int = 0,
+                  vulnerable:bool = True,
                   imagen:Surface | None = None
                  ) -> dict:
     
@@ -138,6 +140,9 @@ def crear_entidad(origen:tuple[int, int],
     entidad['hitbox'] = hitbox
     entidad['agresivo'] = False
     entidad['radio_deteccion'] = radio_deteccion
+    entidad['iframes'] = iframes
+    entidad['cd_iframes'] = iframes
+    entidad['vulnerable'] = vulnerable
 
     return entidad
 

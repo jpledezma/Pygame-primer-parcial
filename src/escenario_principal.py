@@ -70,7 +70,8 @@ def escenario_juego(pantalla:pygame.Surface):
     sfx_pj_dañado = pygame.mixer.Sound("./assets/sfx/damage_taken.wav")
     sfx_ataque_bruja = pygame.mixer.Sound("./assets/sfx/witch_attack.wav")
     sfx_enemigo_muerto = pygame.mixer.Sound("./assets/sfx/enemy_death.wav")
-    sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto]
+    sfx_enemigo_dañado = pygame.mixer.Sound("./assets/sfx/enemy_damaged.wav")
+    sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto, sfx_enemigo_dañado]
 
     for sonido in sonidos:
         sonido.set_volume(volumen_efectos_global)
@@ -82,15 +83,14 @@ def escenario_juego(pantalla:pygame.Surface):
     pj_vida_maxima = 200
     pj_mana_maxima = 100
     pj_energia_maxima = FPS * 3
-    pj_vulnerable = True
-    pj_dañado = False
-    iframes = FPS #// 2
-    cooldown_iframes = iframes
-    pj_daño_recibido = 0
     flag_sfx_ataque = False
+    pj_atacando = False
+    pj_cd_ataque = FPS // 2
+    pj_contador_cd_ataque = pj_cd_ataque
+    flag_pj_cd_ataque = True
     # Imagen
     img_personaje = pygame.image.load("assets/sprites/personaje/knight_idle_0.png")
-    personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=20, mana=pj_mana_maxima, energia=pj_energia_maxima, imagen=img_personaje)
+    personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=50, mana=pj_mana_maxima, energia=pj_energia_maxima, iframes=FPS, vulnerable=True, imagen=img_personaje)
     personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
     personaje['velocidad'] = 1
     personaje['hitbox'].width = personaje['rect'].width // 2 
@@ -134,9 +134,7 @@ def escenario_juego(pantalla:pygame.Surface):
 
     enemigos = []
     for i in range(8):
-        enemigo = crear_entidad((0, 0), ancho=75, alto=100, vida=randint(80, 240), poder_ataque=randint(20, 50), imagen=tipos_enemigos[randint(0, 1)])
-        enemigo['rect'].right = randint(limite_izquierdo, limite_derecho)
-        enemigo['rect'].top = randint(limite_superior, limite_inferior//2)
+        enemigo = crear_entidad((randint(limite_izquierdo, limite_derecho - 75), randint(limite_superior, limite_inferior//2)), ancho=75, alto=100, vida=randint(80, 240), poder_ataque=randint(20, 50), iframes=FPS//2, imagen=tipos_enemigos[randint(0, 1)])
         enemigos.append(enemigo)
 
     # ---- Consumibles ----
@@ -153,15 +151,13 @@ def escenario_juego(pantalla:pygame.Surface):
 
     # Evento personalizados
     EVENTO_ENEMIGO_ESPECIAL = pygame.USEREVENT + 1
-    pygame.time.set_timer(EVENTO_ENEMIGO_ESPECIAL, 15000)
+    pygame.time.set_timer(EVENTO_ENEMIGO_ESPECIAL, 20000)
 
     EVENTO_POCION_VIDA = pygame.USEREVENT + 2
-    pygame.time.set_timer(EVENTO_POCION_VIDA, 7000)
+    pygame.time.set_timer(EVENTO_POCION_VIDA, 10000)
 
     EVENTO_POCION_MANA = pygame.USEREVENT + 3
-    pygame.time.set_timer(EVENTO_POCION_MANA, 7000)
-
-    personaje['mana'] = 0
+    pygame.time.set_timer(EVENTO_POCION_MANA, 10000)
 
     # Loop del juego
     while True:
@@ -184,10 +180,7 @@ def escenario_juego(pantalla:pygame.Surface):
                     
                 # Iniciar movimiento personaje
                 if evento.key == K_w or evento.key == K_a or evento.key == K_s or evento.key == K_d:
-                    pj_ataque_arriba = False
-                    pj_ataque_abajo = False
-                    pj_ataque_derecha = False
-                    pj_ataque_izquierda = False
+                    pj_atacando = False
                 if evento.key == K_w:
                     pj_mover_arriba = True
                 if evento.key == K_a:
@@ -202,6 +195,7 @@ def escenario_juego(pantalla:pygame.Surface):
 
                 if evento.key == K_i or evento.key == K_k or evento.key == K_j or evento.key == K_l:
                     flag_sfx_ataque = True
+                    pj_atacando = True
                 # Ataque personaje
                 if evento.key == K_i:
                     pj_ataque_arriba = True
@@ -214,6 +208,8 @@ def escenario_juego(pantalla:pygame.Surface):
 
             # Detener movimiento personaje
             if evento.type == KEYUP:
+                if evento.key == K_i or evento.key == K_k or evento.key == K_j or evento.key == K_l:
+                    pj_atacando = False
                 if evento.key == K_w:
                     pj_mover_arriba = False
                 if evento.key == K_a:
@@ -237,43 +233,100 @@ def escenario_juego(pantalla:pygame.Surface):
                     pj_ataque_izquierda = False
 
             if evento.type == EVENTO_ENEMIGO_ESPECIAL:
-                bruja = crear_entidad((randint(limite_izquierdo, limite_derecho - 75), limite_superior), ancho=75, alto=100, vida=300, radio_deteccion=0, poder_ataque=0, imagen=img_bruja)
+                bruja = crear_entidad((randint(limite_izquierdo, limite_derecho - 75), limite_superior), ancho=75, alto=100, vida=300, radio_deteccion=0, poder_ataque=100,iframes=FPS//2, imagen=img_bruja)
                 enemigos.append(bruja)
                 entidades.append(bruja)
 
-            if evento.type == EVENTO_POCION_VIDA:
-                pocion_vida = crear_entidad((randint(limite_izquierdo, limite_derecho - 50), randint(limite_superior, limite_inferior - 50)), ancho=25, alto=25, vida=1, mana=0, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_vida)
+            if evento.type == EVENTO_POCION_VIDA and len(pociones) < 6:
+                pocion_vida = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=1, mana=0, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_vida)
                 pociones.append(pocion_vida)
                 entidades.append(pocion_vida)
-            if evento.type == EVENTO_POCION_MANA:
-                pocion_mana = crear_entidad((randint(limite_izquierdo, limite_derecho - 50), randint(limite_superior, limite_inferior - 50)), ancho=25, alto=25, vida=0, mana=1, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_mana)
+            if evento.type == EVENTO_POCION_MANA and len(pociones) < 6:
+                pocion_mana = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=0, mana=1, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_mana)
                 pociones.append(pocion_mana)
                 entidades.append(pocion_mana)
                 
 
         # ------ Actualizar elementos ------
 
+        # Ataque personaje
+        if pj_atacando and personaje['energia'] > 15:
+            pj_mover_abajo = False
+            pj_mover_arriba = False
+            pj_mover_derecha = False
+            pj_mover_izquierda = False
+            if flag_sfx_ataque:
+                sfx_pj_ataque.play()
+                flag_sfx_ataque = False
+            # Reproducir el sonido de nuevo si se completa la animacion
+            if contador_ticks == FPS:
+                flag_sfx_ataque = True
+
+            if pj_ataque_arriba:
+                pj_animacion_seleccionada = 'atacando_arriba'
+                hitbox_ataque = crear_rectangulo((0, 0), personaje['rect'].width, personaje['hitbox'].height, VERDE)
+                hitbox_ataque['rect'].midtop = personaje['rect'].midtop
+
+            if pj_ataque_abajo:
+                pj_animacion_seleccionada = 'atacando_abajo'
+                hitbox_ataque = crear_rectangulo((0, 0), personaje['rect'].width, personaje['hitbox'].height, VERDE)
+                hitbox_ataque['rect'].midbottom = personaje['rect'].midbottom
+
+            if pj_ataque_derecha:
+                pj_animacion_seleccionada = 'atacando_derecha'
+                hitbox_ataque = crear_rectangulo((0, 0), personaje['rect'].width//4*3, personaje['hitbox'].height, VERDE)
+                hitbox_ataque['rect'].midleft = (personaje['rect'].centerx - 20, personaje['rect'].centery + 10)
+
+            if pj_ataque_izquierda:
+                pj_animacion_seleccionada = 'atacando_izquierda'
+                hitbox_ataque = crear_rectangulo((0, 0), personaje['rect'].width//4*3, personaje['hitbox'].height, VERDE)
+                hitbox_ataque['rect'].midright = (personaje['rect'].centerx + 20, personaje['rect'].centery + 10)
+
+            if flag_pj_cd_ataque:
+                personaje['energia'] -= 30
+                flag_pj_cd_ataque = False
+            
+
+        else:
+            pj_atacando = False
+            pj_animacion_seleccionada = 'quieto'
+
+        if not flag_pj_cd_ataque and pj_contador_cd_ataque > 0:
+            pj_contador_cd_ataque -= 1
+        else:
+            pj_contador_cd_ataque = pj_cd_ataque
+            flag_pj_cd_ataque = True
+
+        # Estado de los enemigos
         for enemigo in enemigos[:]:
+            # Detectar al personaje
             if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) <= enemigo['radio_deteccion']:
                 enemigo['agresivo'] = True
 
-            if personaje['hitbox'].colliderect(enemigo['hitbox']) and pj_vulnerable:
-                pj_dañado = True
-                pj_daño_recibido = enemigo['poder_ataque']
-                
+            # Dañar al personaje
+            if personaje['hitbox'].colliderect(enemigo['hitbox']) and personaje['vulnerable']:
+                personaje['vida'] -= enemigo['poder_ataque']
+                sfx_pj_dañado.play()
+                personaje['vulnerable'] = False
+                if enemigo['imagen'] == img_ataque_bruja:
+                    enemigo['vida'] = 0
 
             # Si el jugador se aleja mucho, el enemigo deja de perseguirlo
-            if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) > enemigo['radio_deteccion'] * 3:
+            if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) > enemigo['radio_deteccion'] * 1.5:
                 enemigo['agresivo'] = False
 
-            # cambiar esto
-            if personaje['hitbox'].colliderect(enemigo['hitbox']):
-                enemigo["vida"] -= 20
+            # Daño al enemigo
+            if enemigo['vulnerable'] and pj_atacando and hitbox_ataque['rect'].colliderect(enemigo['hitbox']):
+                enemigo["vida"] -= personaje['poder_ataque']
+                enemigo['vulnerable'] = False
+                sfx_pj_ataque.stop()
+                sfx_enemigo_dañado.play()
 
+            # Ataque especial de la bruja
             if enemigo['imagen'] == img_bruja:
-                if flag_ataque_bruja:
+                if flag_ataque_bruja and len(enemigos) < 10:
                     flag_ataque_bruja = False
-                    ataque = crear_entidad(enemigo['rect'].center, 50, 50, vida=1, poder_ataque=20, radio_deteccion=1000, imagen=img_ataque_bruja)
+                    ataque = crear_entidad(enemigo['rect'].center, 50, 50, vida=1, velocidad=randint(1, 3), poder_ataque=15, radio_deteccion=1000, imagen=img_ataque_bruja)
                     enemigos.append(ataque)
                     entidades.append(ataque)
                     sfx_ataque_bruja.play()
@@ -283,6 +336,7 @@ def escenario_juego(pantalla:pygame.Surface):
                     cd_ataque_bruja = ataque_bruja
                     flag_ataque_bruja = True
 
+            # Muerte del enemigo
             if enemigo["vida"] <= 0:
                 sfx_enemigo_muerto.play()
                 enemigos.remove(enemigo)
@@ -307,42 +361,16 @@ def escenario_juego(pantalla:pygame.Surface):
                     personaje['mana'] = pj_mana_maxima
 
 
-
-        # -- Personaje --
-        # Daño al personaje
-        if pj_dañado:
-            sfx_pj_dañado.play()
-            pj_dañado = False
-            personaje['vida'] -= pj_daño_recibido
-            pj_vulnerable = False
-
-        if not pj_vulnerable and cooldown_iframes > 0:
-            cooldown_iframes -= 1
-        else:
-            cooldown_iframes = iframes
-            pj_vulnerable = True
-
-        # Ataque personaje
-        if pj_ataque_arriba or pj_ataque_abajo or pj_ataque_izquierda or pj_ataque_derecha:
-            pj_mover_abajo = False
-            pj_mover_arriba = False
-            pj_mover_derecha = False
-            pj_mover_izquierda = False
-            if flag_sfx_ataque:
-                sfx_pj_ataque.play()
-                flag_sfx_ataque = False
-            # Reproducir el sonido de nuevo si se completa la animacion
-            if contador_ticks == FPS:
-                flag_sfx_ataque = True
-
-        if pj_ataque_arriba:
-            pj_animacion_seleccionada = 'atacando_arriba'
-        if pj_ataque_abajo:
-            pj_animacion_seleccionada = 'atacando_abajo'
-        if pj_ataque_derecha:
-            pj_animacion_seleccionada = 'atacando_derecha'
-        if pj_ataque_izquierda:
-            pj_animacion_seleccionada = 'atacando_izquierda'
+        # Daño a las entidades
+        # Se agregan iframes (frames de invulnerabilidad) para que solo
+        # reciban daño cada cierto tiempo, y que no sea de manera continua
+        for entidad in entidades:
+            if not entidad['vulnerable'] and entidad['cd_iframes'] > 0:
+                entidad['cd_iframes'] -= 1
+            else:
+                entidad['cd_iframes'] = entidad['iframes']
+                entidad['vulnerable'] = True
+        
             
         # Movimiento personaje
         if pj_mover_izquierda and personaje["rect"].left > limite_izquierdo:
@@ -369,12 +397,13 @@ def escenario_juego(pantalla:pygame.Surface):
         if pj_sprint and personaje['energia'] > 0:
             personaje['energia'] -= 1
             multiplicador_sprint = 2
-        if not pj_sprint and personaje['energia'] < pj_energia_maxima:
+        if not pj_sprint and not pj_atacando and personaje['energia'] < pj_energia_maxima:
             personaje['energia'] += 1
             multiplicador_sprint = 1
 
         if personaje['energia'] <= 0:
             pj_sprint = False
+            pj_atacando = False
 
         # Animaciones
         contador_animaciones -= 1
@@ -391,13 +420,9 @@ def escenario_juego(pantalla:pygame.Surface):
             temporizador -= 1
             contador_ticks = FPS
             texto_contador_segundos = escribir_texto((0, 0), f"{temporizador:03}", AMARILLO)
-            texto_contador_segundos['rect'].center = (ancho_pantalla //2, altura_hud // 2)
-
-        
-
+            texto_contador_segundos['rect'].center = (ancho_pantalla //2, altura_hud // 2)      
 
         # Movimiento enemigos
-
         for enemigo in enemigos:
             if enemigo['agresivo']:
                 # Mover al enemigo hacia el jugador
@@ -410,10 +435,17 @@ def escenario_juego(pantalla:pygame.Surface):
                 else:
                     enemigo['rect'].centerx += enemigo['velocidad']
 
-
+        # Hitboxes
         for entidad in entidades:
             entidad['hitbox'].bottom = entidad['rect'].bottom
             entidad['hitbox'].centerx = entidad['rect'].centerx
+
+        if pj_ataque_abajo:
+            personaje['hitbox'].centery -= 20
+        if pj_ataque_derecha:
+            personaje['hitbox'].centerx -= 20
+        if pj_ataque_izquierda:
+            personaje['hitbox'].centerx += 20
 
         
         # HUD
@@ -446,11 +478,18 @@ def escenario_juego(pantalla:pygame.Surface):
         dibujar_rectangulo(pantalla, barra_mana)
         dibujar_rectangulo(pantalla, fondo_barra_energia)
         dibujar_rectangulo(pantalla, barra_energia)
-
+        
 
         # Enemigos
         for enemigo in enemigos:
             blitear_superficie(pantalla, enemigo)
+
+        # Hitboxes
+        # if pj_atacando:
+        #     dibujar_rectangulo(pantalla, hitbox_ataque)
+        # for entidad in entidades:
+        #     pygame.draw.rect(pantalla, BLANCO, entidad['hitbox'], 1)
+        #     pygame.draw.rect(pantalla, BLANCO, entidad['rect'], 1)
 
         # Personaje
         pantalla.blit(animaciones[pj_animacion_seleccionada][frame_animacion_seleccionada]['superficie'], personaje['rect'])
@@ -459,14 +498,6 @@ def escenario_juego(pantalla:pygame.Surface):
         for pocion in pociones:
             blitear_superficie(pantalla, pocion)
 
-        # Hitboxes
-        # for entidad in entidades:
-        #     pygame.draw.rect(pantalla, BLANCO, entidad['hitbox'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, zombie['rect'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, esqueleto['rect'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, zombie['hitbox'], 1)
-        # pygame.draw.rect(pantalla, BLANCO, esqueleto['hitbox'], 1)
-        # pygame.draw.rect(pantalla, ROJO, personaje['hitbox'], 1)
         # print(temporizador)
         
         pygame.display.flip()
