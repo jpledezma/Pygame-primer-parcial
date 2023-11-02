@@ -7,7 +7,7 @@ from calculos import *
 from utilidades import *
 
 # ------------------  Menu Principal  ------------------
-def menu_principal(pantalla:pygame.Surface):
+def menu_principal(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -45,7 +45,7 @@ def menu_principal(pantalla:pygame.Surface):
     pygame.mixer.music.load("assets\musica\The-wanderer.mp3")
     if musica_activa:
         pygame.mixer.music.play(start=0, loops=-1)
-    pygame.mixer.music.set_volume(volumen_musica_global)
+    pygame.mixer.music.set_volume(volumen_musica)
 
     # Loop del menu
     while True:
@@ -54,14 +54,13 @@ def menu_principal(pantalla:pygame.Surface):
                 terminar_juego()
                 
             for boton in botones:
-                # if boton['rect_superficie'].collidepoint(pygame.mouse.get_pos()):
                 if hover(boton['rect_superficie'], pygame.mouse.get_pos()):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_iniciar:
-                            return
+                            return (musica_activa, volumen_musica, volumen_efectos)
                         elif boton == btn_opciones:
-                            menu_opciones(pantalla)
+                            musica_activa, volumen_musica, volumen_efectos, variable_inservible = menu_opciones(pantalla, musica_activa, volumen_musica, volumen_efectos)
                         elif boton == btn_salir:
                             terminar_juego()
                 else:
@@ -81,12 +80,8 @@ def menu_principal(pantalla:pygame.Surface):
 
 # ------------------  Menu opciones  ------------------
 
-def menu_opciones(pantalla:pygame.Surface):
-    # Variables globales de configuracion
-    global musica_activa
-    global volumen_musica_global
-    global volumen_efectos_global
-
+# def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
+def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -128,7 +123,7 @@ def menu_opciones(pantalla:pygame.Surface):
 
     # Selector de volumen de la música
     recta_volumen_musica = crear_rectangulo((50, alto_pantalla - 50), 200, 10, NARANJA, radio_borde=5)
-    posicion_volumen_musica_actual = calcular_posicion_recta(volumen_musica_global * 100, recta_volumen_musica['rect'].left, recta_volumen_musica['rect'].right)
+    posicion_volumen_musica_actual = calcular_posicion_recta(volumen_musica * 100, recta_volumen_musica['rect'].left, recta_volumen_musica['rect'].right)
     slider_volumen_musica = crear_circulo((posicion_volumen_musica_actual, recta_volumen_musica['rect'].centery), 20, BURDEOS)
 
     slider_musica_presionado = False
@@ -139,7 +134,7 @@ def menu_opciones(pantalla:pygame.Surface):
 
     # Selector de volumen de los efectos
     recta_volumen_efectos = crear_rectangulo((50, texto_volumen_musica['rect'].centery - 80), 200, 10, NARANJA, radio_borde=5)
-    posicion_volumen_efectos_actual = calcular_posicion_recta(volumen_efectos_global * 100, recta_volumen_efectos['rect'].left, recta_volumen_efectos['rect'].right)
+    posicion_volumen_efectos_actual = calcular_posicion_recta(volumen_efectos * 100, recta_volumen_efectos['rect'].left, recta_volumen_efectos['rect'].right)
     slider_volumen_efectos = crear_circulo((posicion_volumen_efectos_actual, recta_volumen_efectos['rect'].centery), 20, BURDEOS)
 
     slider_musica_presionado = False
@@ -182,12 +177,12 @@ def menu_opciones(pantalla:pygame.Surface):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_volver:
-                            # El return True sirve como flag por si se entra a las opciones desde Pausa,
+                            # El último True sirve como flag por si se entra a las opciones desde Pausa,
                             # ya que al pulsar en "volver", se detecta al mismo tiempo una pulsación en el
                             # mismo lugar pero en la pantalla pausa.
                             # Esa posición le corresponda al botón "Ir al menú principal", por lo que sale
                             # Inmediatamente del menú pausa y va al menú principal
-                            return True
+                            return (musica_activa, volumen_musica, volumen_efectos, True)
                         elif boton == btn_parar_musica:
                             if musica_activa:
                                 musica_activa = False
@@ -220,14 +215,14 @@ def menu_opciones(pantalla:pygame.Surface):
         else:
             slider_volumen_efectos['color'] = BURDEOS
 
-        # Cambiar el volumen global
+        # Cambiar el volumen
         nivel_volumen_musica = calcular_escala(slider_volumen_musica['centro'][0], volumen_minimo, volumen_maximo)
-        volumen_musica_global = nivel_volumen_musica / 100
+        volumen_musica = nivel_volumen_musica / 100
 
         nivel_volumen_efectos = calcular_escala(slider_volumen_efectos['centro'][0], volumen_minimo, volumen_maximo)
-        volumen_efectos_global = nivel_volumen_efectos / 100
+        volumen_efectos = nivel_volumen_efectos / 100
 
-        pygame.mixer.music.set_volume(volumen_musica_global)
+        pygame.mixer.music.set_volume(volumen_musica)
 
         pantalla.blit(fondo_menu, (0, 0))
 
@@ -251,7 +246,7 @@ def menu_opciones(pantalla:pygame.Surface):
 
 
 # ------------------  Menu pausa  ------------------
-def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface):
+def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -305,12 +300,12 @@ def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface):
                     boton['fondo'].fill(NARANJA)
                     if evento.type == MOUSEBUTTONDOWN:
                         if boton == btn_continuar:
-                            return
+                            return (musica_activa, volumen_musica, volumen_efectos, False)
                         elif boton == btn_opciones:
-                            flag_volver_opciones = menu_opciones(pantalla)
+                            musica_activa, volumen_musica, volumen_efectos, flag_volver_opciones = menu_opciones(pantalla, musica_activa, volumen_musica, volumen_efectos)
                         elif boton == btn_volver_menu_principal and not flag_volver_opciones:
                             # Flag para salir del escenario y volver al loop principal
-                            return True
+                            return (musica_activa, volumen_musica, volumen_efectos, True)
                         elif boton == btn_salir:
                             terminar_juego()
                 else:

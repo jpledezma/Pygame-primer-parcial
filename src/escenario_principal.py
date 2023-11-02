@@ -9,10 +9,7 @@ from menus import *
 from random import randint
 
 # ------------------  Menu Principal  ------------------
-def escenario_juego(pantalla:pygame.Surface):
-
-    global musica_activa
-    global volumen_efectos_global
+def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
 
     # Control de tiempo
     CLOCK = pygame.time.Clock()
@@ -63,6 +60,7 @@ def escenario_juego(pantalla:pygame.Surface):
     pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
     if musica_activa:
         pygame.mixer.music.play(start=0, loops=-1)
+        pygame.mixer.music.set_volume(volumen_musica)
     # Sonidos
     sfx_pj_ataque = pygame.mixer.Sound("./assets/sfx/sword_attack.wav")
     sfx_usar_pocion = pygame.mixer.Sound("./assets/sfx/potion_pickup.wav")
@@ -74,7 +72,7 @@ def escenario_juego(pantalla:pygame.Surface):
     sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto, sfx_enemigo_dañado]
 
     for sonido in sonidos:
-        sonido.set_volume(volumen_efectos_global)
+        sonido.set_volume(volumen_efectos)
     
 
     # ---- Personaje principal ----
@@ -161,6 +159,8 @@ def escenario_juego(pantalla:pygame.Surface):
 
     # Loop del juego
     while True:
+        for sonido in sonidos:
+            sonido.set_volume(volumen_efectos)
         CLOCK.tick(FPS)
         # ------ Detectar eventos ------
         for evento in pygame.event.get():
@@ -174,9 +174,9 @@ def escenario_juego(pantalla:pygame.Surface):
                     # en el menú pausa
                     captura_pantalla = pygame.Surface((ancho_pantalla, alto_pantalla))
                     captura_pantalla.blit(pantalla, (0, 0))
-                    terminar_partida = menu_pausa(pantalla, captura_pantalla)
+                    musica_activa, volumen_musica, volumen_efectos, terminar_partida = menu_pausa(pantalla, captura_pantalla, musica_activa, volumen_musica, volumen_efectos)
                     if terminar_partida:
-                        return
+                        return musica_activa, volumen_musica, volumen_efectos
                     
                 # Iniciar movimiento personaje
                 if evento.key == K_w or evento.key == K_a or evento.key == K_s or evento.key == K_d:
@@ -237,11 +237,11 @@ def escenario_juego(pantalla:pygame.Surface):
                 enemigos.append(bruja)
                 entidades.append(bruja)
 
-            if evento.type == EVENTO_POCION_VIDA and len(pociones) < 6:
+            if evento.type == EVENTO_POCION_VIDA and len(pociones) <= 2:
                 pocion_vida = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=1, mana=0, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_vida)
                 pociones.append(pocion_vida)
                 entidades.append(pocion_vida)
-            if evento.type == EVENTO_POCION_MANA and len(pociones) < 6:
+            if evento.type == EVENTO_POCION_MANA and len(pociones) <= 2:
                 pocion_mana = crear_entidad((randint(limite_izquierdo + 50, limite_derecho - 50), randint(limite_superior + 50, limite_inferior - 50)), ancho=25, alto=25, vida=0, mana=1, radio_deteccion=0, poder_ataque=0, imagen=img_pocion_mana)
                 pociones.append(pocion_mana)
                 entidades.append(pocion_mana)
@@ -498,17 +498,14 @@ def escenario_juego(pantalla:pygame.Surface):
         for pocion in pociones:
             blitear_superficie(pantalla, pocion)
 
-        # print(temporizador)
-        
         pygame.display.flip()
 
-# pygame.init()
-# escenario_juego(pygame.display.set_mode(TAMAÑO_PANTALLA))
 
 # TODO 
-# agregar eventos personalizados (que aparezca una bruja cada cierto tiempo, hasta 3 veces)     
-# Agregar ataques
-# Agregar objetos consumibles (vida, mana)
+# Agregar ataque especial del personaje
+# Agregar excepciones
+# Agregar trucos
+# Solucionar bug sonidos efectos
 # Agregar pantalla game over
 # Agregar puntuaciones y guardarlas en un archivo
 # Agregar menu puntuaciones

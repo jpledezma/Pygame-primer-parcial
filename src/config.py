@@ -27,8 +27,3 @@ TITULO = "In Tenebris"
 
 FUENTE_DEFAULT = font.Font("assets/fuentes/ENDOR___.ttf", 30)
 
-
-# esta variable está maldita
-musica_activa = True
-volumen_musica_global = 1
-volumen_efectos_global = 1

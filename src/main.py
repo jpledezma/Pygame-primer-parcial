@@ -1,11 +1,8 @@
 import pygame
-from pygame.locals import *
-from config import *
-from creacion_elementos import *
-from dibujar_elementos import *
+from config import TITULO, FPS, TAMAÑO_PANTALLA
 from utilidades import terminar_juego
-from menus import *
-from escenario_principal import *
+from menus import menu_principal
+from escenario_principal import escenario_juego
 
 
 pygame.init()
@@ -14,6 +11,7 @@ CLOCK = pygame.time.Clock()
 
 pantalla = pygame.display.set_mode(TAMAÑO_PANTALLA)
 
+musica_activa, volumen_musica, volumen_efectos = (True, 1, 1)
 
 pygame.display.set_caption(TITULO)
 
@@ -24,8 +22,8 @@ while is_running:
     
     CLOCK.tick(FPS)
 
-    menu_principal(pantalla)
-    escenario_juego(pantalla)
+    musica_activa, volumen_musica, volumen_efectos = menu_principal(pantalla, musica_activa, volumen_musica, volumen_efectos)
+    musica_activa, volumen_musica, volumen_efectos = escenario_juego(pantalla, musica_activa, volumen_musica, volumen_efectos)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
