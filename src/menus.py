@@ -348,7 +348,8 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
         sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/victory.mp3")
         frases = ("You defeated", "10 dexterity. But don't tell anyone you leveled that up.", 
                   "Giant's, giant's, giant's. Become UNSTOPPABLE.", "Well, what is it? Are you pro yet?",
-                  "The legend never dies.", "Bear seek seek lest")
+                  "The legend never dies.", "Bear seek seek lest", "Praise the Sun", "every soul has its dark", 
+                  "Everything is darkest before the soul'")
 
     else:
         color_texto = ROJO

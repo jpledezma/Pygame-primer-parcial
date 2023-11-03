@@ -99,23 +99,19 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
     pj_cd_ataque = FPS // 2
     pj_contador_cd_ataque = pj_cd_ataque
     flag_pj_cd_ataque = True
-    # Imagen
-    img_personaje = pygame.image.load("assets/sprites/personaje/knight_idle_0.png")
-    personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=50, mana=pj_mana_maxima, energia=pj_energia_maxima, iframes=FPS, vulnerable=True, imagen=img_personaje)
-    personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
-    personaje['velocidad'] = 1
-    personaje['hitbox'].width = personaje['rect'].width // 2 
     # Movimiento personaje
     pj_mover_arriba = False
     pj_mover_abajo = False
     pj_mover_derecha = False
     pj_mover_izquierda = False
     pj_sprint = False
-
+    # Ataques
     pj_ataque_arriba = False
     pj_ataque_abajo = False
     pj_ataque_derecha = False
     pj_ataque_izquierda = False
+    # Ataque especial
+    pj_ataque_especial = False
     # Animaciones
     animaciones = {'quieto': [], 'moviendo_arriba':[], 'moviendo_abajo':[], 'moviendo_izquierda':[], 'moviendo_derecha':[], 
                    'atacando_arriba':[], 'atacando_abajo':[], 'atacando_derecha':[], 'atacando_izquierda':[]}
@@ -131,6 +127,11 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         animaciones['atacando_izquierda'].append(crear_superficie((0, 0), 90, 70, imagen=pygame.image.load(f"assets/sprites/personaje/knight_slice_left_{i}.png")))
 
     pj_animacion_seleccionada = 'quieto'
+    # Superficie
+    personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=50, mana=pj_mana_maxima, energia=pj_energia_maxima, iframes=FPS, vulnerable=True, imagen=animaciones['quieto'][0]['imagen'])
+    personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
+    img_ataque_especial = pygame.image.load(f"assets\sprites\efectos\magic_spell.png")
+    ataques_especiales = []
 
     # ---- Enemigos ----
     img_zombie = pygame.image.load("assets/sprites/enemigos/zombie.png")
@@ -209,7 +210,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                     pj_mover_abajo = True
                 if evento.key == K_d:
                     pj_mover_derecha = True
-
+                # Sprint
                 if evento.key == K_LSHIFT:
                     pj_sprint = True
 
@@ -225,6 +226,9 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                     pj_ataque_derecha = True
                 if evento.key == K_j:
                     pj_ataque_izquierda = True
+                # Ataque especial
+                if evento.key == K_SPACE:
+                    pj_ataque_especial = True
 
                 # Trucos
                 if evento.key == K_F1:
@@ -304,6 +308,9 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                     pj_ataque_derecha = False
                 if evento.key == K_j:
                     pj_ataque_izquierda = False
+                # Ataque especial
+                if evento.key == K_SPACE:
+                    pj_ataque_especial = False
 
             # Spawn bruja
             if evento.type == EVENTO_ENEMIGO_ESPECIAL:
@@ -360,8 +367,6 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
             if flag_pj_cd_ataque:
                 personaje['energia'] -= 30
                 flag_pj_cd_ataque = False
-            
-
         else:
             pj_atacando = False
             pj_animacion_seleccionada = 'quieto'
@@ -371,6 +376,22 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         else:
             pj_contador_cd_ataque = pj_cd_ataque
             flag_pj_cd_ataque = True
+
+        # Ataque especial personaje
+        if pj_ataque_especial and personaje['mana'] >= 20:
+            pj_ataque_especial = False
+            sfx_pj_ataque_especial.play()
+            personaje['mana'] -= 40
+            ataque_especial = crear_entidad((personaje['rect'].left + 17, personaje['rect'].top), 50, 50, vida=1, velocidad=3, poder_ataque=100, radio_deteccion=0, imagen=img_ataque_especial)
+            ataques_especiales.append(ataque_especial)
+            entidades.append(ataque_especial)
+        if personaje['mana'] <= 0:
+            personaje['mana'] = 0
+        for ataque in ataques_especiales[:]:
+            ataque['rect'].top -= ataque['velocidad']
+            if ataque['rect'].bottom <= 0:
+                entidades.remove(ataque)
+                ataques_especiales.remove(ataque)
 
         # Estado de los enemigos
         for enemigo in enemigos[:]:
@@ -397,6 +418,11 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 enemigo['vulnerable'] = False
                 sfx_pj_ataque.stop()
                 sfx_enemigo_dañado.play()
+            for ataque in ataques_especiales:
+                if enemigo['vulnerable'] and ataque['rect'].colliderect(enemigo['hitbox']):
+                    enemigo["vida"] -= ataque['poder_ataque']
+                    enemigo['vulnerable'] = False
+                    sfx_enemigo_dañado.play()
 
             # Ataque especial de la bruja
             if enemigo['imagen'] == img_bruja:
@@ -433,7 +459,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 if personaje['vida'] > pj_vida_maxima:
                     personaje['vida'] = pj_vida_maxima
                 if pocion["mana"]:
-                    personaje['mana'] += 10
+                    personaje['mana'] += 50
                 if personaje['mana'] > pj_mana_maxima:
                     personaje['mana'] = pj_mana_maxima
 
@@ -557,6 +583,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 enemigo['radio_deteccion'] = 0
 
 
+        # Terminar partida
         if len(enemigos) == 0:
             puntaje = enemigos_derrotados * 100 + temporizador * 10 + bonus_no_hit
             for truco in trucos.values():
@@ -581,21 +608,13 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         pantalla.blit(fondo_escenario, (0, altura_hud))
         pantalla.blit(fondo_hud, (0, 0))
 
-        # HUD
-        blitear_texto(pantalla, texto_contador_segundos)
-        blitear_texto(pantalla, texto_contador_enemigos)
-
-        dibujar_rectangulo(pantalla, fondo_barra_vida)
-        dibujar_rectangulo(pantalla, barra_vida)
-        dibujar_rectangulo(pantalla, fondo_barra_mana)
-        dibujar_rectangulo(pantalla, barra_mana)
-        dibujar_rectangulo(pantalla, fondo_barra_energia)
-        dibujar_rectangulo(pantalla, barra_energia)
-        
-
         # Enemigos
         for enemigo in enemigos:
             blitear_superficie(pantalla, enemigo)
+
+        # Ataques especiales del jugador
+        for ataque in ataques_especiales:
+            blitear_superficie(pantalla, ataque)
 
         if trucos_activos:
             blitear_texto(pantalla, texto_trucos_activos)
@@ -614,10 +633,20 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         for pocion in pociones:
             blitear_superficie(pantalla, pocion)
 
+        # HUD
+        blitear_texto(pantalla, texto_contador_segundos)
+        blitear_texto(pantalla, texto_contador_enemigos)
+
+        dibujar_rectangulo(pantalla, fondo_barra_vida)
+        dibujar_rectangulo(pantalla, barra_vida)
+        dibujar_rectangulo(pantalla, fondo_barra_mana)
+        dibujar_rectangulo(pantalla, barra_mana)
+        dibujar_rectangulo(pantalla, fondo_barra_energia)
+        dibujar_rectangulo(pantalla, barra_energia)
+
         pygame.display.flip()
 
 
 # TODO 
 # Agregar ataque especial del personaje
-# Agregar excepciones
 # Agregar menu informacion
