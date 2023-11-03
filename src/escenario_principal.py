@@ -170,6 +170,9 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
     EVENTO_POCION_MANA = pygame.USEREVENT + 3
     pygame.time.set_timer(EVENTO_POCION_MANA, 10000)
 
+    # Bonus de puntuacion por si no se recibe daño
+    bonus_no_hit = 2000
+
     # Loop del juego
     while True:
         CLOCK.tick(FPS)
@@ -380,6 +383,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
                 personaje['vida'] -= enemigo['poder_ataque']
                 sfx_pj_dañado.play()
                 personaje['vulnerable'] = False
+                bonus_no_hit = 0
                 if enemigo['imagen'] == img_ataque_bruja:
                     enemigo['vida'] = 0
 
@@ -534,9 +538,6 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         barra_vida['rect'].width = regla_3_simple(personaje['vida'], pj_vida_maxima, fondo_barra_vida['rect'].width - 10)
         barra_vida['rect'].midleft = (fondo_barra_vida['rect'].left + 5, fondo_barra_vida['rect'].centery)
 
-        if len(enemigos) == 0:
-            print("Victoria")
-
         # Trucos
         if trucos['vida_infinita']:
             pj_vida_maxima = 1000000
@@ -554,6 +555,24 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         if trucos['invisible']:
             for enemigo in enemigos:
                 enemigo['radio_deteccion'] = 0
+
+
+        if len(enemigos) == 0:
+            puntaje = enemigos_derrotados * 100 + temporizador * 10 + bonus_no_hit
+            for truco in trucos.values():
+                if truco:
+                    puntaje = 0
+                    break
+            menu_game_over(pantalla, True, puntaje, "Has derrotado a todos los enemigos")
+            return musica_activa, volumen_musica, volumen_efectos
+        
+        if personaje['vida'] <= 0:
+            menu_game_over(pantalla, False, 0, "Has muerto")
+            return musica_activa, volumen_musica, volumen_efectos
+        
+        if temporizador <= 0:
+            menu_game_over(pantalla, False, 0, "Se ha agotado el tiempo")
+            return musica_activa, volumen_musica, volumen_efectos
 
 
         # ------ Dibujar elementos ------
@@ -601,6 +620,4 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 # TODO 
 # Agregar ataque especial del personaje
 # Agregar excepciones
-# Agregar pantalla game over
-# Agregar menu puntuaciones
-# Agregar puntuaciones y guardarlas en un archivo
+# Agregar menu informacion

@@ -5,6 +5,9 @@ from dibujar_elementos import *
 from config import *
 from calculos import *
 from utilidades import *
+from random import randrange
+
+fuente_texto_principal = Font("assets/fuentes/ENDOR___.ttf", 50)
 
 # ------------------  Menu Principal  ------------------
 def menu_principal(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
@@ -17,10 +20,8 @@ def menu_principal(pantalla:pygame.Surface, musica_activa, volumen_musica, volum
     fondo_menu = pygame.transform.scale(fondo_menu, (ancho_pantalla, alto_pantalla))
 
     # Título del juego en el menu
-    fuente_titulo = Font("assets/fuentes/ENDOR___.ttf", 50)
-
-    texto_titulo = escribir_texto((0, 0), TITULO, AMARILLO, fuente=fuente_titulo)
-    sombra_titulo = escribir_texto((0, 0), TITULO, ROJO, fuente=fuente_titulo)
+    texto_titulo = escribir_texto((0, 0), TITULO, AMARILLO, fuente=fuente_texto_principal)
+    sombra_titulo = escribir_texto((0, 0), TITULO, ROJO, fuente=fuente_texto_principal)
 
     texto_titulo['rect'].center = (centro_pantalla[0], alto_pantalla/4)
     sombra_titulo['rect'].center = (centro_pantalla[0] + 3, alto_pantalla/4 + 3)
@@ -91,10 +92,9 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
     fondo_menu = pygame.transform.scale(fondo_menu, (ancho_pantalla, alto_pantalla))
 
     # Texto principal del menú
-    fuente_titulo = Font("assets/fuentes/ENDOR___.ttf", 50)
 
-    texto_opciones = escribir_texto((0, 0), "Opciones", AMARILLO, fuente=fuente_titulo)
-    sombra_opciones = escribir_texto((0, 0), "Opciones", ROJO, fuente=fuente_titulo)
+    texto_opciones = escribir_texto((0, 0), "Opciones", AMARILLO, fuente=fuente_texto_principal)
+    sombra_opciones = escribir_texto((0, 0), "Opciones", ROJO, fuente=fuente_texto_principal)
 
     texto_opciones['rect'].center = (centro_pantalla[0], alto_pantalla/4)
     sombra_opciones['rect'].center = (centro_pantalla[0] + 3, alto_pantalla/4 + 3)
@@ -257,10 +257,9 @@ def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_
     filtro_pantalla.fill((0, 0, 0, 150))
 
     # Título del juego en el menu pausa
-    fuente_pausa = Font("assets/fuentes/ENDOR___.ttf", 50)
 
-    texto_pausa = escribir_texto((0, 0), "Pausa", AMARILLO, fuente=fuente_pausa)
-    sombra_pausa = escribir_texto((0, 0), "Pausa", ROJO, fuente=fuente_pausa)
+    texto_pausa = escribir_texto((0, 0), "Pausa", AMARILLO, fuente=fuente_texto_principal)
+    sombra_pausa = escribir_texto((0, 0), "Pausa", ROJO, fuente=fuente_texto_principal)
 
     texto_pausa['rect'].center = (centro_pantalla[0], alto_pantalla/4)
     sombra_pausa['rect'].center = (centro_pantalla[0] + 3, alto_pantalla/4 + 3)
@@ -320,5 +319,100 @@ def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_
 
         blitear_texto(pantalla, sombra_pausa)
         blitear_texto(pantalla, texto_pausa)
+
+        pygame.display.flip()
+
+
+def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comentario:str) -> None:
+    ancho_pantalla = pantalla.get_width()
+    alto_pantalla = pantalla.get_height()
+    centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
+
+    # Leer el archivo de puntaje máximo para comparar las puntuaciones
+    # Si no existe, crearlo y escribir la puntuacion recibida por parametro
+    try:
+        archivo_puntuacion = open('puntuacion.csv', 'r')
+        puntaje_maximo = int(archivo_puntuacion.readline())
+        if puntuacion > puntaje_maximo:
+            puntaje_maximo = puntuacion
+    except:
+        puntaje_maximo = puntuacion
+    finally:
+        archivo_puntuacion = open('puntuacion.csv', 'w')
+        archivo_puntuacion.write(str(puntaje_maximo))
+        archivo_puntuacion.close()
+
+    if victoria:
+        color_texto = AMARILLO
+        mensaje = "Victoria"
+        sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/victory.mp3")
+        frases = ("You defeated", "10 dexterity. But don't tell anyone you leveled that up.", 
+                  "Giant's, giant's, giant's. Become UNSTOPPABLE.", "Well, what is it? Are you pro yet?",
+                  "The legend never dies.", "Bear seek seek lest")
+
+    else:
+        color_texto = ROJO
+        mensaje = "Game Over"
+        sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/game_over.mp3")
+        frases = ("Hesitation is defeat.", "git gud", "Just level up adp", 
+                  "Unfortunately for you, however, you are maidenless.", 
+                  "Shiva the east? More like shiva the deceased", "You were still just a puppy.",
+                  "Don't you dare go Hollow.", "So easily forgotten...", 'Is this "too easy" for you?')
+
+    # Textos
+    fuente_frase = pygame.font.SysFont('Arial', 32)
+    fuente_comentario = pygame.font.SysFont('Arial', 40)
+
+    texto_principal = escribir_texto((0, 0), mensaje, color_texto, fuente=fuente_texto_principal)
+    texto_frase_aleatoria = escribir_texto((0, 0), frases[randrange(len(frases))], GRIS_CLARO, fuente=fuente_frase)
+    texto_comentario = escribir_texto((0, 0), comentario, BLANCO, fuente=fuente_comentario)
+    texto_puntaje = escribir_texto((0, 0), f"Puntaje: {puntuacion}", BLANCO, fuente=fuente_frase)
+    texto_puntaje_maximo = escribir_texto((0, 0), f"Puntaje máximo: {puntaje_maximo}", BLANCO, fuente=fuente_frase)
+
+    texto_principal['rect'].center = (centro_pantalla[0], alto_pantalla / 6)
+    texto_comentario['rect'].center = (centro_pantalla[0], texto_principal['rect'].centery + 130)
+    texto_frase_aleatoria['rect'].center = (centro_pantalla[0], centro_pantalla[1] - 50)
+    texto_puntaje['rect'].center = (centro_pantalla[0], centro_pantalla[1] + 50)
+    texto_puntaje_maximo['rect'].center = (centro_pantalla[0], texto_puntaje['rect'].centery + 50)
+
+    textos = [texto_principal, texto_comentario, texto_frase_aleatoria, texto_puntaje, texto_puntaje_maximo]
+
+    # Botones
+    btn_volver_menu_principal = crear_boton((0, 0), "Volver al menú principal", GRIS_CLARO, AZUL, espaciado_y=15, espaciado_x=80)
+    btn_salir = crear_boton((0, 0), "Salir del juego", GRIS_CLARO, AZUL, espaciado_y=15, espaciado_x=80)
+
+    btn_salir['rect_superficie'].midbottom = (centro_pantalla[0], alto_pantalla - 50)
+    btn_salir['rect_texto'].center = btn_salir['rect_superficie'].center
+
+    btn_volver_menu_principal['rect_superficie'].center = (centro_pantalla[0], btn_salir['rect_superficie'].top - 50)
+    btn_volver_menu_principal['rect_texto'].center = (centro_pantalla[0], btn_salir['rect_superficie'].top - 50)
+
+    botones = [btn_volver_menu_principal, btn_salir]
+
+    sonido_finalizacion.play()
+
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == QUIT:
+                terminar_juego()
+                
+            for boton in botones:
+                if hover(boton['rect_superficie'], pygame.mouse.get_pos()):
+                    boton['fondo'].fill(CELESTE)
+                    if evento.type == MOUSEBUTTONDOWN:
+                        if boton == btn_volver_menu_principal:
+                            return
+                        elif boton == btn_salir:
+                            terminar_juego()
+                else:
+                    boton['fondo'].fill(AZUL)
+
+        pantalla.fill(NEGRO)
+
+        blitear_boton(pantalla, btn_volver_menu_principal)
+        blitear_boton(pantalla, btn_salir)
+
+        for texto in textos:
+            blitear_texto(pantalla, texto)
 
         pygame.display.flip()
