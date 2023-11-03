@@ -104,7 +104,7 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
     btn_volver = crear_boton((0, 0), "Volver", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
     btn_parar_musica = crear_boton((0, 0), "Activar/desactivar música", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
     btn_salir = crear_boton((0, 0), "Salir del juego", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
-    btn_mostrar_instrucciones = crear_boton((0, 0), "Mostrar teclas", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
+    btn_mostrar_instrucciones = crear_boton((0, 0), "Mostrar controles", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=80)
 
     btn_parar_musica['rect_superficie'].center = centro_pantalla
     btn_parar_musica['rect_texto'].center = centro_pantalla
@@ -190,6 +190,8 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
                             else:
                                 musica_activa = True
                                 pygame.mixer.music.play()
+                        elif boton == btn_mostrar_instrucciones:
+                            menu_informacion(pantalla)
                         elif boton == btn_salir:
                             terminar_juego()
                 else:
@@ -323,6 +325,7 @@ def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_
         pygame.display.flip()
 
 
+# ------------------  Pantalla de finalización  ------------------
 def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comentario:str) -> None:
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
@@ -415,5 +418,76 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
 
         for texto in textos:
             blitear_texto(pantalla, texto)
+
+        pygame.display.flip()
+
+
+# ------------------  Menu de Información  ------------------
+def menu_informacion(pantalla:pygame.Surface):
+    ancho_pantalla = pantalla.get_width()
+    alto_pantalla = pantalla.get_height()
+    centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
+
+    # Background
+    fondo_menu = pygame.image.load("assets//backgrounds/main-menu-background.jpg")
+    fondo_menu = pygame.transform.scale(fondo_menu, (ancho_pantalla, alto_pantalla))
+
+    # Título del juego en el menu
+    texto_titulo = escribir_texto((0, 0), "Controles", AMARILLO, fuente=fuente_texto_principal)
+    sombra_titulo = escribir_texto((0, 0), "Controles", ROJO, fuente=fuente_texto_principal)
+
+    texto_titulo['rect'].center = (centro_pantalla[0], alto_pantalla/7)
+    sombra_titulo['rect'].center = (centro_pantalla[0] + 3, alto_pantalla/7 + 3)
+
+    # Boton del menu
+    btn_volver = crear_boton((0, 0), "Volver", GRIS_CLARO, BURDEOS, espaciado_y=10, espaciado_x=120)
+    btn_volver['rect_superficie'].center = (ancho_pantalla - 200, alto_pantalla - 100)
+    btn_volver['rect_texto'].center = (ancho_pantalla - 200, alto_pantalla - 100)
+
+    # Textos de informacion
+    fuente_informacion = pygame.font.SysFont('Arial', 24)
+    
+
+    textos = [crear_boton((200, 200), "W: Mover arriba", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 250), "A: Mover izquierda", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 300), "S: Mover abajo", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 350), "D: Mover derecha", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+
+              crear_boton((200, 400), "I: Atacar arriba", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 450), "J: Atacar izquierda", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 500), "K: Atacar abajo", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 550), "L: Atacar derecha", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((200, 600), "Espacio: Ataque especial", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+
+              crear_boton((700, 200), "F1: Activar trucos", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 250), "1: Truco mostrar hitboxes", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 300), "2: Truco vida infinita", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 350), "3: Truco mana infinita", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 400), "4: Truco energia infinita", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 450), "5: Truco one-shot", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 500), "6: Truco invisible", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+              crear_boton((700, 550), "7: Truco super velocidad", BLANCO, NEGRO, fuente=fuente_informacion, espaciado_x=15, espaciado_y=15),
+             ]
+    # Loop del menu
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == QUIT:
+                terminar_juego()
+                
+            if hover(btn_volver['rect_superficie'], pygame.mouse.get_pos()):
+                btn_volver['fondo'].fill(NARANJA)
+                if evento.type == MOUSEBUTTONDOWN:
+                    return
+            else:
+                btn_volver['fondo'].fill(BURDEOS)
+
+        pantalla.blit(fondo_menu, (0, 0))
+
+        blitear_boton(pantalla, btn_volver)
+
+        blitear_texto(pantalla, sombra_titulo)
+        blitear_texto(pantalla, texto_titulo)
+        for texto in textos:
+            blitear_boton(pantalla, texto)
 
         pygame.display.flip()

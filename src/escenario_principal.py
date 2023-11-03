@@ -646,7 +646,3 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 
         pygame.display.flip()
 
-
-# TODO 
-# Agregar ataque especial del personaje
-# Agregar menu informacion
