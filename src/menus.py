@@ -10,7 +10,7 @@ from random import randrange
 fuente_texto_principal = Font("assets/fuentes/ENDOR___.ttf", 50)
 
 # ------------------  Menu Principal  ------------------
-def menu_principal(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
+def menu_principal(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:float, volumen_efectos:float) -> tuple[bool, float, float]:
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -81,8 +81,7 @@ def menu_principal(pantalla:pygame.Surface, musica_activa, volumen_musica, volum
 
 # ------------------  Menu opciones  ------------------
 
-# def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
-def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
+def menu_opciones(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:float, volumen_efectos:float) -> tuple[bool, float, float, bool]:
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -218,10 +217,10 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
             slider_volumen_efectos['color'] = BURDEOS
 
         # Cambiar el volumen
-        nivel_volumen_musica = calcular_escala(slider_volumen_musica['centro'][0], volumen_minimo, volumen_maximo)
+        nivel_volumen_musica = calcular_porcentaje_recta(slider_volumen_musica['centro'][0], volumen_minimo, volumen_maximo)
         volumen_musica = nivel_volumen_musica / 100
 
-        nivel_volumen_efectos = calcular_escala(slider_volumen_efectos['centro'][0], volumen_minimo, volumen_maximo)
+        nivel_volumen_efectos = calcular_porcentaje_recta(slider_volumen_efectos['centro'][0], volumen_minimo, volumen_maximo)
         volumen_efectos = nivel_volumen_efectos / 100
 
         pygame.mixer.music.set_volume(volumen_musica)
@@ -248,7 +247,7 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa, volumen_musica, volume
 
 
 # ------------------  Menu pausa  ------------------
-def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
+def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_activa:bool, volumen_musica:float, volumen_efectos:float) -> tuple[bool, float, float, bool]:
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)
@@ -280,8 +279,6 @@ def menu_pausa(pantalla:pygame.Surface, captura_partida: pygame.Surface, musica_
 
     btn_volver_menu_principal['rect_superficie'].center = (centro_pantalla[0], btn_opciones['rect_superficie'].bottom + 50)
     btn_volver_menu_principal['rect_texto'].center = (centro_pantalla[0], btn_opciones['rect_superficie'].bottom + 50)
-    # btn_volver_menu_principal['rect_superficie'].center = (100, 100)
-    # btn_volver_menu_principal['rect_texto'].center = (100, 100)
     
     btn_salir['rect_superficie'].center = (centro_pantalla[0], btn_volver_menu_principal['rect_superficie'].bottom + 50)
     btn_salir['rect_texto'].center = (centro_pantalla[0], btn_volver_menu_principal['rect_superficie'].bottom + 50)
@@ -423,7 +420,7 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
 
 
 # ------------------  Menu de Información  ------------------
-def menu_informacion(pantalla:pygame.Surface):
+def menu_informacion(pantalla:pygame.Surface) -> None:
     ancho_pantalla = pantalla.get_width()
     alto_pantalla = pantalla.get_height()
     centro_pantalla = (ancho_pantalla//2, alto_pantalla//2)

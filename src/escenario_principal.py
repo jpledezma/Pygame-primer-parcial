@@ -9,16 +9,13 @@ from menus import *
 from random import randint
 
 # ------------------  Menu Principal  ------------------
-def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volumen_efectos):
+def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:float, volumen_efectos:float):
 
     # Control de tiempo
     CLOCK = pygame.time.Clock()
 
     temporizador = 200
     contador_ticks = FPS
-    duracion_frame_animacion = FPS // 4
-    contador_animaciones = duracion_frame_animacion
-    frame_animacion_seleccionada = 0
 
     # Dimensiones
     ancho_pantalla = pantalla.get_width()
@@ -127,6 +124,9 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
         animaciones['atacando_izquierda'].append(crear_superficie((0, 0), 90, 70, imagen=pygame.image.load(f"assets/sprites/personaje/knight_slice_left_{i}.png")))
 
     pj_animacion_seleccionada = 'quieto'
+    duracion_frame_animacion = FPS // 4
+    contador_animaciones = duracion_frame_animacion
+    frame_animacion_seleccionada = 0
     # Superficie
     personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=50, mana=pj_mana_maxima, energia=pj_energia_maxima, iframes=FPS, vulnerable=True, imagen=animaciones['quieto'][0]['imagen'])
     personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
@@ -173,6 +173,8 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 
     # Bonus de puntuacion por si no se recibe daño
     bonus_no_hit = 2000
+    # Multiplicador para detectar la activacion de trucos
+    bonus_sin_trucos = 1
 
     # Loop del juego
     while True:
@@ -232,6 +234,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 
                 # Trucos
                 if evento.key == K_F1:
+                    bonus_sin_trucos = 0
                     if trucos_activos:
                         trucos_activos = False
                     else:
@@ -399,6 +402,17 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
             if calcular_distancia(enemigo['rect'].center, personaje['rect'].center) <= enemigo['radio_deteccion']:
                 enemigo['agresivo'] = True
 
+            if enemigo['agresivo'] and not trucos['invisible']:
+                # Mover al enemigo hacia el jugador
+                if enemigo['rect'].centery > personaje['rect'].centery:
+                    enemigo['rect'].centery -= enemigo['velocidad']
+                else:
+                    enemigo['rect'].centery += enemigo['velocidad']
+                if enemigo['rect'].centerx > personaje['rect'].centerx:
+                    enemigo['rect'].centerx -= enemigo['velocidad']
+                else:
+                    enemigo['rect'].centerx += enemigo['velocidad']
+
             # Dañar al personaje
             if personaje['hitbox'].colliderect(enemigo['hitbox']) and personaje['vulnerable']:
                 personaje['vida'] -= enemigo['poder_ataque']
@@ -426,7 +440,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
 
             # Ataque especial de la bruja
             if enemigo['imagen'] == img_bruja:
-                if flag_ataque_bruja and len(enemigos) < 10:
+                if flag_ataque_bruja and len(enemigos) < 10 and not trucos['invisible']:
                     flag_ataque_bruja = False
                     ataque = crear_entidad(enemigo['rect'].center, 50, 50, vida=1, velocidad=randint(1, 3), poder_ataque=15, radio_deteccion=1000, imagen=img_ataque_bruja)
                     enemigos.append(ataque)
@@ -512,10 +526,16 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
             pj_atacando = False
         
         # Animaciones
+
+        # Cuenta atrás del tiempo que dura cada imagen de la animacion
         contador_animaciones -= 1
+        # Si en contador llega a 0, se reinicia y vuelve a contar
+        # Además, pasa a la siguiente imagen de la animacion
         if contador_animaciones == 0:
             contador_animaciones = duracion_frame_animacion
             frame_animacion_seleccionada += 1
+        # Cuando llega a la ultima imagen de la animacion, se reinicia
+        #  y vuelve a la primera en el proximo ciclo
         if frame_animacion_seleccionada > 3:
             frame_animacion_seleccionada = 0
         
@@ -528,18 +548,6 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
             texto_contador_segundos = escribir_texto((0, 0), f"{temporizador:03}", AMARILLO)
             texto_contador_segundos['rect'].center = (ancho_pantalla //2, altura_hud // 2)      
 
-        # Movimiento enemigos
-        for enemigo in enemigos:
-            if enemigo['agresivo']:
-                # Mover al enemigo hacia el jugador
-                if enemigo['rect'].centery > personaje['rect'].centery:
-                    enemigo['rect'].centery -= enemigo['velocidad']
-                else:
-                    enemigo['rect'].centery += enemigo['velocidad']
-                if enemigo['rect'].centerx > personaje['rect'].centerx:
-                    enemigo['rect'].centerx -= enemigo['velocidad']
-                else:
-                    enemigo['rect'].centerx += enemigo['velocidad']
 
         # Hitboxes
         for entidad in entidades:
@@ -578,14 +586,11 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa, volumen_musica, volu
             personaje['poder_ataque'] = 100000
         if trucos['super_velocidad'] and pj_sprint:
             multiplicador_sprint = 5
-        if trucos['invisible']:
-            for enemigo in enemigos:
-                enemigo['radio_deteccion'] = 0
 
 
         # Terminar partida
         if len(enemigos) == 0:
-            puntaje = enemigos_derrotados * 100 + temporizador * 10 + bonus_no_hit
+            puntaje = (enemigos_derrotados * 100 + temporizador * 10 + bonus_no_hit) * bonus_sin_trucos
             for truco in trucos.values():
                 if truco:
                     puntaje = 0

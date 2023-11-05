@@ -1,4 +1,4 @@
-from pygame import font, image
+from pygame import font
 
 font.init() 
 
