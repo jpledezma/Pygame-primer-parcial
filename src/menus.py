@@ -43,10 +43,13 @@ def menu_principal(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:f
     botones = [btn_iniciar, btn_salir, btn_opciones]
 
     # Música del juego
-    pygame.mixer.music.load("assets\musica\The-wanderer.mp3")
-    if musica_activa:
-        pygame.mixer.music.play(start=0, loops=-1)
-    pygame.mixer.music.set_volume(volumen_musica)
+    try:
+        pygame.mixer.music.load("assets\musica\The-wanderer.mp3")
+        if musica_activa:
+            pygame.mixer.music.play(start=0, loops=-1)
+        pygame.mixer.music.set_volume(volumen_musica)
+    except:
+        print("No se conectó ningún dispositivo de salida de audio")
 
     # Loop del menu
     while True:
@@ -185,10 +188,16 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:fl
                         elif boton == btn_parar_musica:
                             if musica_activa:
                                 musica_activa = False
-                                pygame.mixer.music.stop()
+                                try:
+                                    pygame.mixer.music.stop()
+                                except:
+                                    print("No se conectó ningún dispositivo de salida de audio")
                             else:
                                 musica_activa = True
-                                pygame.mixer.music.play()
+                                try:
+                                    pygame.mixer.music.play()
+                                except:
+                                    print("No se conectó ningún dispositivo de salida de audio")
                         elif boton == btn_mostrar_instrucciones:
                             menu_informacion(pantalla)
                         elif boton == btn_salir:
@@ -223,7 +232,10 @@ def menu_opciones(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:fl
         nivel_volumen_efectos = calcular_porcentaje_recta(slider_volumen_efectos['centro'][0], volumen_minimo, volumen_maximo)
         volumen_efectos = nivel_volumen_efectos / 100
 
-        pygame.mixer.music.set_volume(volumen_musica)
+        try:
+            pygame.mixer.music.set_volume(volumen_musica)
+        except:
+            print("No se conectó ningún dispositivo de salida de audio")
 
         pantalla.blit(fondo_menu, (0, 0))
 
@@ -345,7 +357,12 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
     if victoria:
         color_texto = AMARILLO
         mensaje = "Victoria"
-        sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/victory.mp3")
+        try:
+            sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/victory.mp3")
+        except:
+            print("No se conectó ningún dispositivo de salida de audio")
+
+        # ver linea 517
         frases = ("You defeated", "10 dexterity. But don't tell anyone you leveled that up.", 
                   "Giant's, giant's, giant's. Become UNSTOPPABLE.", "Well, what is it? Are you pro yet?",
                   "The legend never dies.", "Bear seek seek lest", "Praise the Sun", "every soul has its dark", 
@@ -354,7 +371,12 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
     else:
         color_texto = ROJO
         mensaje = "Game Over"
-        sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/game_over.mp3")
+        try:
+            sonido_finalizacion = pygame.mixer.Sound("./assets/sfx/game_over.mp3")
+        except:
+            print("No se conectó ningún dispositivo de salida de audio")
+
+        # ver linea 517
         frases = ("Hesitation is defeat.", "git gud", "Just level up adp", 
                   "Unfortunately for you, however, you are maidenless.", 
                   "Shiva the east? More like shiva the deceased", "You were still just a puppy.",
@@ -390,7 +412,10 @@ def menu_game_over(pantalla:pygame.Surface, victoria:bool, puntuacion:int, comen
 
     botones = [btn_volver_menu_principal, btn_salir]
 
-    sonido_finalizacion.play()
+    try:
+        sonido_finalizacion.play()
+    except:
+        print("No se conectó ningún dispositivo de salida de audio")
 
     while True:
         for evento in pygame.event.get():
@@ -488,3 +513,17 @@ def menu_informacion(pantalla:pygame.Surface) -> None:
             blitear_boton(pantalla, texto)
 
         pygame.display.flip()
+
+# https://www.dictionary.com/e/slang/git-gud/
+# https://www.reddit.com/r/darksouls/comments/99nzn9/you_defeated_vs_victory_achieved/
+# https://sekiro-shadows-die-twice.fandom.com/wiki/Isshin,_the_Sword_Saint
+# https://knowyourmeme.com/memes/solaire-of-astora
+# https://knowyourmeme.com/memes/john-darksoul-john-dark-soul
+# https://www.reddit.com/r/darksouls/comments/ywxz6f/all_jokes_aside_who_or_what_is_the_furtive_pygmy/
+# https://darksouls2.wiki.fextralife.com/Adaptability
+# https://www.urbandictionary.com/define.php?term=bearer-seek-seek-lest-    https://www.youtube.com/watch?v=ARFykpIcvtA
+# https://www.youtube.com/watch?v=oyA8odjCzZ4
+# https://www.youtube.com/watch?v=1cKqAmxHVdQ
+# https://www.youtube.com/watch?v=2kr7KDCsIws
+# https://www.youtube.com/watch?v=MfI1TxtxYHE
+# https://www.youtube.com/watch?v=YPdQyBdZgCo

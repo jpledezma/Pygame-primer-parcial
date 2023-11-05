@@ -67,22 +67,28 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
              }
 
     # Música del juego
-    pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
-    if musica_activa:
-        pygame.mixer.music.play(start=0, loops=-1)
-        pygame.mixer.music.set_volume(volumen_musica)
+    try:
+        pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
+        if musica_activa:
+            pygame.mixer.music.play(start=0, loops=-1)
+            pygame.mixer.music.set_volume(volumen_musica)
+    except:
+        print("No se conectó ningún dispositivo de salida de audio")
     # Sonidos
-    sfx_pj_ataque = pygame.mixer.Sound("./assets/sfx/sword_attack.wav")
-    sfx_usar_pocion = pygame.mixer.Sound("./assets/sfx/potion_pickup.wav")
-    sfx_pj_ataque_especial = pygame.mixer.Sound("./assets/sfx/special_attack.wav")
-    sfx_pj_dañado = pygame.mixer.Sound("./assets/sfx/damage_taken.wav")
-    sfx_ataque_bruja = pygame.mixer.Sound("./assets/sfx/witch_attack.wav")
-    sfx_enemigo_muerto = pygame.mixer.Sound("./assets/sfx/enemy_death.wav")
-    sfx_enemigo_dañado = pygame.mixer.Sound("./assets/sfx/enemy_damaged.wav")
-    sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto, sfx_enemigo_dañado]
+    try:
+        sfx_pj_ataque = pygame.mixer.Sound("./assets/sfx/sword_attack.wav")
+        sfx_usar_pocion = pygame.mixer.Sound("./assets/sfx/potion_pickup.wav")
+        sfx_pj_ataque_especial = pygame.mixer.Sound("./assets/sfx/special_attack.wav")
+        sfx_pj_dañado = pygame.mixer.Sound("./assets/sfx/damage_taken.wav")
+        sfx_ataque_bruja = pygame.mixer.Sound("./assets/sfx/witch_attack.wav")
+        sfx_enemigo_muerto = pygame.mixer.Sound("./assets/sfx/enemy_death.wav")
+        sfx_enemigo_dañado = pygame.mixer.Sound("./assets/sfx/enemy_damaged.wav")
+        sonidos = [sfx_pj_ataque, sfx_usar_pocion, sfx_pj_ataque_especial, sfx_pj_dañado, sfx_ataque_bruja, sfx_enemigo_muerto, sfx_enemigo_dañado]
 
-    for sonido in sonidos:
-        sonido.set_volume(volumen_efectos)
+        for sonido in sonidos:
+            sonido.set_volume(volumen_efectos)
+    except:
+            print("No se conectó ningún dispositivo de salida de audio")
     
 
     # ---- Personaje principal ----
@@ -341,7 +347,10 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
             pj_mover_derecha = False
             pj_mover_izquierda = False
             if flag_sfx_ataque:
-                sfx_pj_ataque.play()
+                try:
+                    sfx_pj_ataque.play()
+                except:
+                    print("No se conectó ningún dispositivo de salida de audio")
                 flag_sfx_ataque = False
             # Reproducir el sonido de nuevo si se completa la animacion
             if contador_ticks == FPS:
@@ -382,8 +391,11 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
 
         # Ataque especial personaje
         if pj_ataque_especial and personaje['mana'] >= 20:
+            try:
+                sfx_pj_ataque_especial.play()
+            except:
+                print("No se conectó ningún dispositivo de salida de audio")
             pj_ataque_especial = False
-            sfx_pj_ataque_especial.play()
             personaje['mana'] -= 40
             ataque_especial = crear_entidad((personaje['rect'].left + 17, personaje['rect'].top), 50, 50, vida=1, velocidad=3, poder_ataque=100, radio_deteccion=0, imagen=img_ataque_especial)
             ataques_especiales.append(ataque_especial)
@@ -416,7 +428,10 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
             # Dañar al personaje
             if personaje['hitbox'].colliderect(enemigo['hitbox']) and personaje['vulnerable']:
                 personaje['vida'] -= enemigo['poder_ataque']
-                sfx_pj_dañado.play()
+                try:
+                    sfx_pj_dañado.play()
+                except:
+                    print("No se conectó ningún dispositivo de salida de audio")
                 personaje['vulnerable'] = False
                 bonus_no_hit = 0
                 if enemigo['imagen'] == img_ataque_bruja:
@@ -430,13 +445,19 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
             if enemigo['vulnerable'] and pj_atacando and hitbox_ataque['rect'].colliderect(enemigo['hitbox']):
                 enemigo["vida"] -= personaje['poder_ataque']
                 enemigo['vulnerable'] = False
-                sfx_pj_ataque.stop()
-                sfx_enemigo_dañado.play()
+                try:
+                    sfx_pj_ataque.stop()
+                    sfx_enemigo_dañado.play()
+                except:
+                    print("No se conectó ningún dispositivo de salida de audio")
             for ataque in ataques_especiales:
                 if enemigo['vulnerable'] and ataque['rect'].colliderect(enemigo['hitbox']):
                     enemigo["vida"] -= ataque['poder_ataque']
                     enemigo['vulnerable'] = False
-                    sfx_enemigo_dañado.play()
+                    try:
+                        sfx_enemigo_dañado.play()
+                    except:
+                        print("No se conectó ningún dispositivo de salida de audio")
 
             # Ataque especial de la bruja
             if enemigo['imagen'] == img_bruja:
@@ -445,7 +466,10 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
                     ataque = crear_entidad(enemigo['rect'].center, 50, 50, vida=1, velocidad=randint(1, 3), poder_ataque=15, radio_deteccion=1000, imagen=img_ataque_bruja)
                     enemigos.append(ataque)
                     entidades.append(ataque)
-                    sfx_ataque_bruja.play()
+                    try:
+                        sfx_ataque_bruja.play()
+                    except:
+                        print("No se conectó ningún dispositivo de salida de audio")
                 if not flag_ataque_bruja and cd_ataque_bruja > 0:
                     cd_ataque_bruja -= 1
                 else:
@@ -454,7 +478,10 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
 
             # Muerte del enemigo
             if enemigo["vida"] <= 0:
-                sfx_enemigo_muerto.play()
+                try:
+                    sfx_enemigo_muerto.play()
+                except:
+                    print("No se conectó ningún dispositivo de salida de audio")
                 enemigos.remove(enemigo)
                 entidades.remove(enemigo)
                 if enemigo['imagen'] != img_ataque_bruja:
@@ -467,7 +494,10 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
             if personaje['rect'].colliderect(pocion['rect']):
                 pociones.remove(pocion)
                 entidades.remove(pocion)
-                sfx_usar_pocion.play()
+                try:
+                    sfx_usar_pocion.play()
+                except:
+                    print("No se conectó ningún dispositivo de salida de audio")
                 if pocion["vida"]:
                     personaje['vida'] += 50
                 if personaje['vida'] > pj_vida_maxima:
@@ -650,4 +680,3 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
         dibujar_rectangulo(pantalla, barra_energia)
 
         pygame.display.flip()
-
