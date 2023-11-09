@@ -68,7 +68,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
 
     # Música del juego
     try:
-        pygame.mixer.music.load("assets\musica\OurLordIsNotReady.mp3")
+        pygame.mixer.music.load("assets/musica/OurLordIsNotReady.mp3")
         if musica_activa:
             pygame.mixer.music.play(start=0, loops=-1)
             pygame.mixer.music.set_volume(volumen_musica)
@@ -136,7 +136,7 @@ def escenario_juego(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:
     # Superficie
     personaje = crear_entidad((0, 0), 90, 70, vida=pj_vida_maxima, poder_ataque=50, mana=pj_mana_maxima, energia=pj_energia_maxima, iframes=FPS, vulnerable=True, imagen=animaciones['quieto'][0]['imagen'])
     personaje['rect'].center = (ancho_pantalla / 2, alto_pantalla - 50)
-    img_ataque_especial = pygame.image.load(f"assets\sprites\efectos\magic_spell.png")
+    img_ataque_especial = pygame.image.load(f"assets/sprites/efectos/magic_spell.png")
     ataques_especiales = []
 
     # ---- Enemigos ----

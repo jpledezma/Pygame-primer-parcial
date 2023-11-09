@@ -44,7 +44,7 @@ def menu_principal(pantalla:pygame.Surface, musica_activa:bool, volumen_musica:f
 
     # Música del juego
     try:
-        pygame.mixer.music.load("assets\musica\The-wanderer.mp3")
+        pygame.mixer.music.load("assets/musica/The-wanderer.mp3")
         if musica_activa:
             pygame.mixer.music.play(start=0, loops=-1)
         pygame.mixer.music.set_volume(volumen_musica)
